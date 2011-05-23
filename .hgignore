@@ -1,0 +1,15 @@
+syntax: glob
+Debug/*
+Release/*
+*.bak
+ipch/*
+handin/*
+a2.ncb
+output.svg
+test.png
+tile.png
+voronoi.ncb
+voronoi.sdf
+voronoi.suo
+voronoi.vcxproj.filters
+voronoi.vcxproj.user
