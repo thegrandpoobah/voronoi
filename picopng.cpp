@@ -599,15 +599,29 @@ int main(int argc, char *argv[])
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 namespace {
 void loadFile(std::vector<unsigned char>& buffer, const std::string& filename) //designed for loading files from hard disk in an std::vector
 {
-  std::ifstream file(filename.c_str(), std::ios::in|std::ios::binary|std::ios::ate);
+  using std::ifstream;
+  using std::ios;
+  using std::exception;
+  using std::stringstream;
+  using std::streamsize;
+
+  ifstream file(filename.c_str(), ios::in|ios::binary|ios::ate);
+
+  if (!file.is_open()) {
+	stringstream s;
+
+	s << "Unable to open input file " << filename;
+	throw exception(s.str().c_str());
+  }
 
   //get filesize
-  std::streamsize size = 0;
-  if(file.seekg(0, std::ios::end).good()) size = file.tellg();
-  if(file.seekg(0, std::ios::beg).good()) size -= file.tellg();
+  streamsize size = 0;
+  if(file.seekg(0, ios::end).good()) size = file.tellg();
+  if(file.seekg(0, ios::beg).good()) size -= file.tellg();
 
   //read contents of the file into the vector
   if(size > 0)
@@ -616,6 +630,8 @@ void loadFile(std::vector<unsigned char>& buffer, const std::string& filename) /
     file.read((char*)(&buffer[0]), size);
   }
   else buffer.clear();
+
+  file.close();
 }
 } // another anonymous namespace
 
@@ -625,16 +641,23 @@ namespace PNG {
 
 PNGFile *load( const std::string &filename )
 {
-	PNGFile *newPngFile = new PNGFile();
+  using std::vector;
+  using std::stringstream;
+  using std::exception;
+  
+  PNGFile *newPngFile = new PNGFile();
 
   //load and decode
-  std::vector<unsigned char> buffer, image;
+  vector<unsigned char> buffer, image;
   loadFile(buffer, filename);
   int error = decodePNG(image, newPngFile->w, newPngFile->h, buffer.empty() ? 0 : &buffer[0], (unsigned long)buffer.size());
   
   //if there's an error, display it
   if(error != 0) {
-	  throw std::exception( "unable to load png file" );
+	  stringstream s;
+
+	  s << filename << " does not seem to be a PNG image.";
+	  throw exception( s.str().c_str() );
   }
   
   newPngFile->data = new unsigned char[image.size()];
