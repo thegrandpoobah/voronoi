@@ -140,10 +140,12 @@ int main( int argc, char *argv[] ) {
 		return -1;
 	}
 
+	cout << "Generating " << parameters->points << " stipples." << endl;
+
 	if ( parameters->createLogs ) {
 		log << "Generating " << parameters->points << " stipples." << endl;
+
 		log << "Displacement Threshold is " << parameters->threshold << "." << endl;
-		cout << "Generating " << parameters->points << " stipples." << endl;
 		cout << "Displacement Threshold is " << parameters->threshold << "." << endl;
 	}
 
