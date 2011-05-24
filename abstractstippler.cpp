@@ -26,6 +26,7 @@ THE SOFTWARE.
 #include <GL/glu.h>
 
 #include <fstream>
+#include <sstream>
 #include <limits>
 
 #include <boost/random.hpp>
@@ -43,7 +44,7 @@ points(points),
 tileWidth(128), tileHeight(128),
 displacement(std::numeric_limits<float>::max()),
 vertsX(new float[points]), vertsY(new float[points]), radii(new float[points]),
-image(image_path),
+image(image_path), _useColour(false),
 dl_circle(0) {
 	createInitialDistribution();
 	createCircleDisplayList();
@@ -55,6 +56,10 @@ AbstractStippler::~AbstractStippler() {
 	delete[] radii;
 	delete[] vertsX;
 	delete[] vertsY;
+}
+
+void AbstractStippler::useColour() {
+	_useColour = true;
 }
 
 void AbstractStippler::distribute() {
@@ -100,10 +105,13 @@ void AbstractStippler::paint() {
 
 	::glMatrixMode( GL_MODELVIEW );
 	::glColor3d( 0.0, 0.0, 0.0 );
-	for ( unsigned int i = 0; i < points; ++i ) {
-		unsigned char r, g, b;
 
-		image.getColour((unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b);
+	unsigned char r = 0, g = 0, b = 0;
+	for ( unsigned int i = 0; i < points; ++i ) {
+		if (_useColour) {
+			image.getColour((unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b);
+		}
+
 		::glPushMatrix();
 		::glTranslatef( vertsX[i], vertsY[i], 0.0f );
 		::glScalef( radii[i], radii[i], 1.0f );
@@ -128,7 +136,7 @@ void AbstractStippler::paint() {
 	::glColor3d( 0.0, 1.0, 0.0 );
 	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
 		for ( EdgeList::iterator value_iter = key_iter->second.begin(); value_iter != key_iter->second.end(); ++value_iter ) {
-			::glVertex2f( value_iter->begin.x, value_iter->begin.y );
+		::glVertex2f( value_iter->begin.x, value_iter->begin.y );
 			::glVertex2f( value_iter->end.x, value_iter->end.y );
 		}
 	}
@@ -173,15 +181,24 @@ void AbstractStippler::createInitialDistribution() {
 void AbstractStippler::render( std::string &output_path ) {
 	using namespace std;
 
+	unsigned char r = 0, g = 0, b = 0;
+
 	ofstream outputStream( output_path.c_str() );
+
+	if ( !outputStream.is_open() ) {
+		stringstream s;
+		s<< "Unable to open output file " << output_path;
+		throw exception(s.str().c_str());
+	}
 
 	outputStream << "<?xml version=\"1.0\" ?>" << endl;
 	outputStream << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" << endl;
 	outputStream << "<svg width=\"" << image.getWidth() << "\" height=\"" << image.getHeight() << "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" << endl;
 	for ( unsigned int i = 0; i < points; ++i ) {
-		unsigned char r, g, b;
 
-		image.getColour((unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b);
+		if ( _useColour ) {
+			image.getColour((unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b);
+		}
 
 		outputStream << "<circle cx=\"" << vertsX[i] << "\" cy=\"" << vertsY[i] << "\" r=\"" << radii[i] << "\" fill=\"rgb(" << (int)r << "," << (int)g << "," << (int)b << ")\" />" << endl;
 	}

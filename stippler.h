@@ -32,6 +32,7 @@ public:
 	virtual void paint() = 0;
 	virtual float getAverageDisplacement() = 0;
 	virtual void render( std::string &output_path ) = 0;
+	virtual void useColour() = 0;
 };
 
 #endif // STIPPLER_H

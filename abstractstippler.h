@@ -58,6 +58,8 @@ public:
 	void paint();
 	float getAverageDisplacement();
 	void render( std::string &output_path );
+
+	void useColour();
 protected:
 	void createInitialDistribution();
 	void createVoronoiDiagram();
@@ -87,6 +89,7 @@ protected:
 	Bitmap image;
 
 	unsigned int tileWidth, tileHeight;
+	bool _useColour;
 };
 
 bool operator==(Point<float> const& p1, Point<float> const& p2);
