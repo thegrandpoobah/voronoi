@@ -63,35 +63,33 @@ void CPUStippler::renderCell( EdgeMap::iterator &cell, const AbstractStippler::e
 std::pair< Point<float>, float > CPUStippler::calculateCellCentroid( const AbstractStippler::extents &extent ) {
 	unsigned char *fbPtr = framebuffer;
 
-	float areaDensity = 0.0;
-	float xSum = 0.0;
-	float ySum = 0.0;
+	float area = 0.0f, areaDensity = 0.0f;
+	float xSum = 0.0f;
+	float ySum = 0.0f;
 
 	float xStep = ( extent.maxX - extent.minX ) / (float)tileWidth;
 	float yStep = ( extent.maxY - extent.minY ) / (float)tileHeight;
 	float xCurrent;
 	float yCurrent;
 
-	float area = 0.0f;
-	float subarea = xStep * yStep;
-
 	yCurrent = extent.minY;
 	for ( unsigned int y = 0; y < tileHeight; ++y, yCurrent+=yStep ) {
 		xCurrent = extent.minX;
 		for ( unsigned int x = 0; x < tileWidth; ++x, xCurrent += xStep ) {
-			float density = (float)(*fbPtr)/255.0f;
+			float density = (float)(*fbPtr);
 			fbPtr+=4;
 
-			area += subarea * density;
 			areaDensity += density;
 			xSum += density * xCurrent;
 			ySum += density * ( extent.maxY - ( yCurrent - extent.minY ) );
 		}
 	}
 
+	area = areaDensity * xStep * yStep;
+
 	Point<float> pt;
 	pt.x = xSum / areaDensity;
 	pt.y = ySum / areaDensity;
 
-	return std::make_pair( pt, area );
+	return std::make_pair( pt, area / 255.0f );
 }
