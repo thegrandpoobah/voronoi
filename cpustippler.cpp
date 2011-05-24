@@ -82,14 +82,10 @@ std::pair< Point<float>, float > CPUStippler::calculateCellCentroid( const Abstr
 			float density = (float)(*fbPtr)/255.0f;
 			fbPtr+=4;
 
-			if ( density < getIntensityThreshold() ) { 
-				continue;
-			}
-
 			area += subarea * density;
 			areaDensity += density;
 			xSum += density * xCurrent;
-			ySum += density * ( extent.maxY - (yCurrent - extent.minY) );
+			ySum += density * ( extent.maxY - ( yCurrent - extent.minY ) );
 		}
 	}
 

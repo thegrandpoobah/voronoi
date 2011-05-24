@@ -23,16 +23,10 @@ THE SOFTWARE.
 
 uniform sampler2D texelUnit;
 uniform float subarea;
-uniform float threshold;
 uniform vec4 extents;
 
 void main(void) {
 	vec4 data = texture2D( texelUnit, gl_TexCoord[0].st );
 	vec2 pos = vec2( extents[0] + gl_TexCoord[0].s * extents[1], extents[2] - gl_TexCoord[0].t * extents[3] );
-	if ( data.x > threshold ) {
-		gl_FragColor = vec4( data.x, data.x * pos.x, data.x * pos.y, data.x * subarea );
-	} else {
-		gl_FragColor = vec4( 0, 0, 0, 0 );
-	}
-	//gl_FragColor = vec4( data.x, pos.x, pos.y, data.x * subarea );
+	gl_FragColor = vec4( data.x, data.x * pos.x, data.x * pos.y, data.x * subarea );
 }

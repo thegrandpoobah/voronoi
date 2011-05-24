@@ -183,8 +183,6 @@ void GPUStippler::transferDataToReadBuffer( const AbstractStippler::extents &ext
 	dataMappingShader->startProgram();
 	::glUniform1i( dataMappingShader->getParameter( std::string( "texelUnit" ) ),
 		0 );
-	::glUniform1f( dataMappingShader->getParameter( std::string( "threshold" ) ),
-		(float)getIntensityThreshold() );
 	::glUniform1f( dataMappingShader->getParameter( std::string( "subarea" ) ), 
 		stepX * stepY );
 	::glUniform4f( dataMappingShader->getParameter( std::string( "extents" ) ),

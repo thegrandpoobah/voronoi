@@ -64,8 +64,6 @@ protected:
 	void createInitialDistribution();
 	void createVoronoiDiagram();
 
-	float getIntensityThreshold();
-
 	extents getCellExtents( EdgeMap::iterator &cell );
 
 	void redistributeStipples();

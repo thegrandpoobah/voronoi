@@ -115,7 +115,7 @@ void AbstractStippler::paint() {
 		::glPushMatrix();
 		::glTranslatef( vertsX[i], vertsY[i], 0.0f );
 		::glScalef( radii[i], radii[i], 1.0f );
-		::glColor3f(((float)r)/255.0f, ((float)g)/255.0f, ((float)b)/255.0f);
+		::glColor3ub( r, g, b );
 		::glCallList( dl_circle );
 		::glPopMatrix();
 	}
@@ -144,10 +144,6 @@ void AbstractStippler::paint() {
 #endif // RENDER_VORONOI_EDGES
 
 	::glEnable( GL_DEPTH_TEST );
-}
-
-float AbstractStippler::getIntensityThreshold() {
-	return 0.098f;
 }
 
 float AbstractStippler::getAverageDisplacement() {
