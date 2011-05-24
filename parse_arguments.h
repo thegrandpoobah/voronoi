@@ -40,12 +40,14 @@ struct StipplingParameters {
 	unsigned int points;
 	float threshold;
 	bool createLogs;
+	bool useColour;
 
 	StipplingParameters() {
 		algorithm = CPU;
 		points = 4000;
 		threshold = 0.1f;
-		createLogs = true;
+		createLogs = false;
+		useColour = false;
 	}
 };
 
