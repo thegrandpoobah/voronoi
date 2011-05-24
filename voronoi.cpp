@@ -35,6 +35,7 @@ THE SOFTWARE.
 #include <string>
 #include <memory>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 
 // boost
@@ -70,14 +71,21 @@ int main( int argc, char *argv[] ) {
 	using std::exception;
 	using std::ofstream;
 	using std::cout;
+	using std::cerr;
 	using std::endl;
+	using std::setprecision;
+	using std::setiosflags;
+	using std::ios;
 	using boost::timer;
 
 	auto_ptr<StipplingParameters> parameters;
 	
 	try {
 		parameters = parseArguments( argc, argv );
-	} catch ( exception ) {
+		if (parameters.get() == NULL) {
+			return 0;
+		}
+	} catch ( exception e ) {
 		return -1;
 	}
 
@@ -106,18 +114,30 @@ int main( int argc, char *argv[] ) {
 		log.open( "log.txt" );
 	}
 
-	if ( parameters->algorithm == StipplingParameters::CPU ) {
-		if ( parameters->createLogs ) {
-			log << "Using CPU Stippler." << endl;
-			cout << "Using CPU Stippler." << endl;
+	try {
+		if ( parameters->algorithm == StipplingParameters::CPU ) {
+			if ( parameters->createLogs ) {
+				log << "Using CPU Stippler." << endl;
+				cout << "Using CPU Stippler." << endl;
+			}
+			stippler = auto_ptr<Stippler>( new CPUStippler( parameters->inputFile, parameters->points ) );
+			if ( parameters->useColour ) {
+				stippler->useColour();
+			}
+		} else {
+			if ( parameters->createLogs ) {
+				log << "Using GPU Stippler." << endl;
+				cout << "Using GPU Stippler." << endl;
+			}
+			stippler = auto_ptr<Stippler>( new GPUStippler( parameters->inputFile, parameters->points ) );
+			if ( parameters->useColour ) {
+				stippler->useColour();
+			}
 		}
-		stippler = auto_ptr<Stippler>( new CPUStippler( parameters->inputFile, parameters->points ) );
-	} else {
-		if ( parameters->createLogs ) {
-			log << "Using GPU Stippler." << endl;
-			cout << "Using GPU Stippler." << endl;
-		}
-		stippler = auto_ptr<Stippler>( new GPUStippler( parameters->inputFile, parameters->points ) );
+	} catch ( exception e ) {
+		cerr << e.what() << endl;
+
+		return -1;
 	}
 
 	if ( parameters->createLogs ) {
@@ -149,10 +169,16 @@ int main( int argc, char *argv[] ) {
 			log << "Current Displacement: " << t << endl;
 			cout << "Current Displacement: " << t << endl;
 		}
+
+		cout << setiosflags(ios::fixed) << setprecision(2) << (parameters->threshold / t * 100) << "% Complete" << endl; 
 	} while ( t > parameters->threshold );
 
 	// render final result to SVG
-	stippler->render( parameters->outputFile );
+	try {
+		stippler->render( parameters->outputFile );
+	} catch (exception e) {
+		cerr << e.what();
+	}
 
 	if ( parameters->createLogs ) {
 		log.close();
