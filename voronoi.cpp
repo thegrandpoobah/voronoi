@@ -173,7 +173,6 @@ int main( int argc, char *argv[] ) {
 			cout << "Current Displacement: " << t << endl;
 		}
 
-		
 		cout << setiosflags(ios::fixed) << setprecision(2) << min((parameters->threshold / t * 100), 100.0f) << "% Complete" << endl; 
 	} while ( t > parameters->threshold );
 
