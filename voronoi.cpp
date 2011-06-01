@@ -76,6 +76,7 @@ int main( int argc, char *argv[] ) {
 	using std::setprecision;
 	using std::setiosflags;
 	using std::ios;
+	using std::min;
 	using boost::timer;
 
 	auto_ptr<StipplingParameters> parameters;
@@ -172,7 +173,8 @@ int main( int argc, char *argv[] ) {
 			cout << "Current Displacement: " << t << endl;
 		}
 
-		cout << setiosflags(ios::fixed) << setprecision(2) << (parameters->threshold / t * 100) << "% Complete" << endl; 
+		
+		cout << setiosflags(ios::fixed) << setprecision(2) << min((parameters->threshold / t * 100), 100.0f) << "% Complete" << endl; 
 	} while ( t > parameters->threshold );
 
 	// render final result to SVG
