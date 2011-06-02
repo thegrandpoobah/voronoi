@@ -102,7 +102,6 @@
   <ItemGroup>
     <ClCompile Include="abstractstippler.cpp" />
     <ClCompile Include="bitmap.cpp" />
-    <ClCompile Include="cpustippler.cpp" />
     <ClCompile Include="guicon.cpp" />
     <ClCompile Include="parse_arguments.cpp" />
     <ClCompile Include="picopng.cpp" />
@@ -116,7 +115,6 @@
   <ItemGroup>
     <ClInclude Include="abstractstippler.h" />
     <ClInclude Include="bitmap.h" />
-    <ClInclude Include="cpustippler.h" />
     <ClInclude Include="guicon.h" />
     <ClInclude Include="parse_arguments.h" />
     <ClInclude Include="picopng.h" />

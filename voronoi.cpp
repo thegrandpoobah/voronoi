@@ -51,7 +51,7 @@ THE SOFTWARE.
 // local
 #include "bitmap.h"
 #include "stippler.h"
-#include "cpustippler.h"
+#include "abstractstippler.h"
 #include "parse_arguments.h"
 #include "guicon.h"
 

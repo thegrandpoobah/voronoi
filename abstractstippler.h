@@ -39,7 +39,7 @@ THE SOFTWARE.
 #include "utility.h"
 #include "bitmap.h"
 
-class AbstractStippler : public Stippler {
+class CPUStippler : public Stippler {
 protected:
 	typedef std::vector< Edge< float > > EdgeList;
 	typedef boost::unordered_map< Point < float >, EdgeList > EdgeMap;
@@ -51,8 +51,8 @@ protected:
 		float maxY;
 	};
 public:
-	AbstractStippler( std::string &image_path, const unsigned int points );
-	virtual ~AbstractStippler();
+	CPUStippler( std::string &image_path, const unsigned int points );
+	~CPUStippler();
 
 	void distribute();
 	void paint();
@@ -68,12 +68,14 @@ protected:
 
 	void redistributeStipples();
 
-	virtual void renderCell( EdgeMap::iterator &cell, const extents &extent );
-	virtual std::pair< Point<float>, float > calculateCellCentroid( const extents &extent ) = 0;
+	void renderCell( EdgeMap::iterator &cell, const extents &extent );
+	std::pair< Point<float>, float > calculateCellCentroid( const extents &extent );
 
 	// this is just for the front end
 	void createCircleDisplayList();
 protected:
+	unsigned char *framebuffer;
+
 	EdgeMap edges;
 
 	unsigned int points;

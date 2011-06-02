@@ -38,7 +38,7 @@ THE SOFTWARE.
 #undef max
 #endif
 
-AbstractStippler::AbstractStippler( std::string &image_path, const unsigned int points )
+CPUStippler::CPUStippler( std::string &image_path, const unsigned int points )
 : Stippler(),
 points(points),
 tileWidth(128), tileHeight(128),
@@ -46,28 +46,31 @@ displacement(std::numeric_limits<float>::max()),
 vertsX(new float[points]), vertsY(new float[points]), radii(new float[points]),
 image(image_path), _useColour(false),
 dl_circle(0) {
+	framebuffer = new unsigned char[tileWidth*tileHeight*4];
+
 	createInitialDistribution();
 	createCircleDisplayList();
 }
 
-AbstractStippler::~AbstractStippler() {
+CPUStippler::~CPUStippler() {
 	::glDeleteLists( dl_circle, 1 );
 
+	delete[] framebuffer;
 	delete[] radii;
 	delete[] vertsX;
 	delete[] vertsY;
 }
 
-void AbstractStippler::useColour() {
+void CPUStippler::useColour() {
 	_useColour = true;
 }
 
-void AbstractStippler::distribute() {
+void CPUStippler::distribute() {
 	createVoronoiDiagram();
 	redistributeStipples();
 }
 
-void AbstractStippler::paint() {
+void CPUStippler::paint() {
 	// remember what the viewport used to look like
 	GLint vp[4];
 	::glGetIntegerv( GL_VIEWPORT, vp );
@@ -146,11 +149,11 @@ void AbstractStippler::paint() {
 	::glEnable( GL_DEPTH_TEST );
 }
 
-float AbstractStippler::getAverageDisplacement() {
+float CPUStippler::getAverageDisplacement() {
 	return displacement;
 }
 
-void AbstractStippler::createInitialDistribution() {
+void CPUStippler::createInitialDistribution() {
 	// find initial distribution
 	boost::mt19937 rng;
 	boost::uniform_01<boost::mt19937, float> generator( rng );
@@ -174,7 +177,7 @@ void AbstractStippler::createInitialDistribution() {
 	}
 }
 
-void AbstractStippler::render( std::string &output_path ) {
+void CPUStippler::render( std::string &output_path ) {
 	using namespace std;
 
 	unsigned char r = 0, g = 0, b = 0;
@@ -204,7 +207,7 @@ void AbstractStippler::render( std::string &output_path ) {
 	outputStream.close();
 }
 
-void AbstractStippler::createCircleDisplayList() {
+void CPUStippler::createCircleDisplayList() {
 	static const GLint SEGMENTS = 32;
 
 	if ( dl_circle == 0 ) {
@@ -220,7 +223,7 @@ void AbstractStippler::createCircleDisplayList() {
 	}
 }
 
-void AbstractStippler::createVoronoiDiagram() {
+void CPUStippler::createVoronoiDiagram() {
 	VoronoiDiagramGenerator generator;
 
 	generator.generateVoronoi( vertsX, vertsY, points, 
@@ -251,7 +254,7 @@ void AbstractStippler::createVoronoiDiagram() {
 	}
 }
 
-void AbstractStippler::redistributeStipples() {
+void CPUStippler::redistributeStipples() {
 	// remember what the viewport used to look like
 	GLint params[4];
 	::glGetIntegerv( GL_VIEWPORT, params );
@@ -287,7 +290,11 @@ void AbstractStippler::redistributeStipples() {
 	::glViewport( params[0], params[1], params[2], params[3] );
 }
 
-void AbstractStippler::renderCell( EdgeMap::iterator &cell, const AbstractStippler::extents &extent ) {
+#ifdef OUTPUT_TILE
+#include "lodepng.h"
+#endif // OUTPUT_TILE
+
+void CPUStippler::renderCell( EdgeMap::iterator &cell, const CPUStippler::extents &extent ) {
 	// setup opengl state
 	::glMatrixMode( GL_PROJECTION );
 	::glLoadIdentity();
@@ -376,9 +383,52 @@ void AbstractStippler::renderCell( EdgeMap::iterator &cell, const AbstractStippl
 #endif // _DEBUG
 
 	::glEnable( GL_DEPTH_TEST );
+
+	::glReadBuffer( GL_BACK );
+	::glReadPixels( 0, 0, tileWidth, tileHeight, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer );
+
+#ifdef OUTPUT_TILE
+	std::vector<unsigned char> out;
+	LodePNG::encode( out, framebuffer, tileWidth, tileHeight );
+	LodePNG::saveFile( out, std::string( "tile.png" ) );
+#endif // OUTPUT_TILE
 }
 
-AbstractStippler::extents AbstractStippler::getCellExtents( EdgeMap::iterator &cell ) {
+std::pair< Point<float>, float > CPUStippler::calculateCellCentroid( const CPUStippler::extents &extent ) {
+	unsigned char *fbPtr = framebuffer;
+
+	float area = 0.0f, areaDensity = 0.0f;
+	float xSum = 0.0f;
+	float ySum = 0.0f;
+
+	float xStep = ( extent.maxX - extent.minX ) / (float)tileWidth;
+	float yStep = ( extent.maxY - extent.minY ) / (float)tileHeight;
+	float xCurrent;
+	float yCurrent;
+
+	yCurrent = extent.minY;
+	for ( unsigned int y = 0; y < tileHeight; ++y, yCurrent+=yStep ) {
+		xCurrent = extent.minX;
+		for ( unsigned int x = 0; x < tileWidth; ++x, xCurrent += xStep ) {
+			float density = (float)(*fbPtr);
+			fbPtr+=4;
+
+			areaDensity += density;
+			xSum += density * xCurrent;
+			ySum += density * ( extent.maxY - ( yCurrent - extent.minY ) );
+		}
+	}
+
+	area = areaDensity * xStep * yStep;
+
+	Point<float> pt;
+	pt.x = xSum / areaDensity;
+	pt.y = ySum / areaDensity;
+
+	return std::make_pair( pt, area / 255.0f );
+}
+
+CPUStippler::extents CPUStippler::getCellExtents( EdgeMap::iterator &cell ) {
 	using std::numeric_limits;
 
 	extents extent;
