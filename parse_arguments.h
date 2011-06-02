@@ -29,12 +29,6 @@ THE SOFTWARE.
 #include <memory>
 
 struct StipplingParameters {
-	enum StippleAlgorithm {
-		CPU,
-		GPU
-	};
-
-	StippleAlgorithm algorithm;
 	std::string inputFile;
 	std::string outputFile;
 	unsigned int points;
@@ -43,7 +37,6 @@ struct StipplingParameters {
 	bool useColour;
 
 	StipplingParameters() {
-		algorithm = CPU;
 		points = 4000;
 		threshold = 0.1f;
 		createLogs = false;

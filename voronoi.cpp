@@ -52,7 +52,6 @@ THE SOFTWARE.
 #include "bitmap.h"
 #include "stippler.h"
 #include "cpustippler.h"
-#include "gpustippler.h"
 #include "parse_arguments.h"
 #include "guicon.h"
 
@@ -116,24 +115,9 @@ int main( int argc, char *argv[] ) {
 	}
 
 	try {
-		if ( parameters->algorithm == StipplingParameters::CPU ) {
-			if ( parameters->createLogs ) {
-				log << "Using CPU Stippler." << endl;
-				cout << "Using CPU Stippler." << endl;
-			}
-			stippler = auto_ptr<Stippler>( new CPUStippler( parameters->inputFile, parameters->points ) );
-			if ( parameters->useColour ) {
-				stippler->useColour();
-			}
-		} else {
-			if ( parameters->createLogs ) {
-				log << "Using GPU Stippler." << endl;
-				cout << "Using GPU Stippler." << endl;
-			}
-			stippler = auto_ptr<Stippler>( new GPUStippler( parameters->inputFile, parameters->points ) );
-			if ( parameters->useColour ) {
-				stippler->useColour();
-			}
+		stippler = auto_ptr<Stippler>( new CPUStippler( parameters->inputFile, parameters->points ) );
+		if ( parameters->useColour ) {
+			stippler->useColour();
 		}
 	} catch ( exception e ) {
 		cerr << e.what() << endl;

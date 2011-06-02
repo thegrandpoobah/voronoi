@@ -73,7 +73,6 @@ std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] ) {
 
 	options_description advancedOpts( "Advanced Options" );
 	advancedOpts.add_options()
-		( "algorithm,a", value< char >()->default_value('c'), "Chooses which Stippling Algorithm will be used" )
 		( "threshold,t", value< float >()->default_value(0.1f, "0.1"), "How long to wait for Voronoi diagram to converge" )
 		( "log,l", "Determines output verbosity" );
 
@@ -110,19 +109,6 @@ std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] ) {
 
 		params->inputFile = vm["input-file"].as<string>();
 		params->outputFile = vm["output-file"].as<string>();
-
-		switch ( vm["algorithm"].as<char>() ) {
-			case 'c':
-			case 'C':
-				params->algorithm = StipplingParameters::CPU;
-				break;
-			case 'g':
-			case 'G':
-				params->algorithm = StipplingParameters::GPU;
-				break;
-			default:
-				throw exception("option algortihm must be either 'c' or 'g'");
-		}
 
 		params->points = vm["stipples"].as<unsigned int>();
 		params->threshold = vm["threshold"].as<float>();
