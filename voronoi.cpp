@@ -50,7 +50,7 @@ THE SOFTWARE.
 
 // local
 #include "bitmap.h"
-#include "stippler.h"
+#include "istippler.h"
 #include "abstractstippler.h"
 #include "parse_arguments.h"
 #include "guicon.h"
@@ -107,7 +107,7 @@ int main( int argc, char *argv[] ) {
 
 	::SDL_GL_SwapBuffers();
 
-	auto_ptr<Stippler> stippler;
+	auto_ptr<IStippler> stippler;
 
 	ofstream log;
 	if ( parameters->createLogs ) {
@@ -115,7 +115,7 @@ int main( int argc, char *argv[] ) {
 	}
 
 	try {
-		stippler = auto_ptr<Stippler>( new CPUStippler( parameters->inputFile, parameters->points ) );
+		stippler = auto_ptr<IStippler>( new CPUStippler( parameters->inputFile, parameters->points ) );
 		if ( parameters->useColour ) {
 			stippler->useColour();
 		}

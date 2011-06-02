@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 #include <string>
 
-class Stippler {
+class IStippler {
 public:
 	virtual void distribute() = 0;
 	virtual void paint() = 0;

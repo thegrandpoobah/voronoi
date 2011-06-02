@@ -39,7 +39,7 @@ THE SOFTWARE.
 #endif
 
 CPUStippler::CPUStippler( std::string &image_path, const unsigned int points )
-: Stippler(),
+: IStippler(),
 points(points),
 tileWidth(128), tileHeight(128),
 displacement(std::numeric_limits<float>::max()),

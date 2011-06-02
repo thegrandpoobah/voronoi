@@ -35,11 +35,11 @@ THE SOFTWARE.
 
 #include <boost/unordered_map.hpp>
 
-#include "stippler.h"
+#include "istippler.h"
 #include "utility.h"
 #include "bitmap.h"
 
-class CPUStippler : public Stippler {
+class CPUStippler : public IStippler {
 protected:
 	typedef std::vector< Edge< float > > EdgeList;
 	typedef boost::unordered_map< Point < float >, EdgeList > EdgeMap;
