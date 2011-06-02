@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef STIPPLER_H
-#define STIPPLER_H
+#ifndef ISTIPPLER_H
+#define ISTIPPLER_H
 
 #include <string>
 
@@ -35,4 +35,4 @@ public:
 	virtual void useColour() = 0;
 };
 
-#endif // STIPPLER_H
+#endif // ISTIPPLER_H

@@ -51,7 +51,7 @@ THE SOFTWARE.
 // local
 #include "bitmap.h"
 #include "istippler.h"
-#include "abstractstippler.h"
+#include "stippler.h"
 #include "parse_arguments.h"
 #include "guicon.h"
 
@@ -115,7 +115,7 @@ int main( int argc, char *argv[] ) {
 	}
 
 	try {
-		stippler = auto_ptr<IStippler>( new CPUStippler( parameters->inputFile, parameters->points ) );
+		stippler = auto_ptr<IStippler>( new Stippler( parameters->inputFile, parameters->points ) );
 		if ( parameters->useColour ) {
 			stippler->useColour();
 		}

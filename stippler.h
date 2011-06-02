@@ -21,8 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef ABSTRACTSTIPPLER_H
-#define ABSTRACTSTIPPLER_H
+#ifndef STIPPLER_H
+#define STIPPLER_H
 
 #ifdef WIN32
 #include <windows.h>
@@ -39,7 +39,7 @@ THE SOFTWARE.
 #include "utility.h"
 #include "bitmap.h"
 
-class CPUStippler : public IStippler {
+class Stippler : public IStippler {
 protected:
 	typedef std::vector< Edge< float > > EdgeList;
 	typedef boost::unordered_map< Point < float >, EdgeList > EdgeMap;
@@ -51,8 +51,8 @@ protected:
 		float maxY;
 	};
 public:
-	CPUStippler( std::string &image_path, const unsigned int points );
-	~CPUStippler();
+	Stippler( std::string &image_path, const unsigned int points );
+	~Stippler();
 
 	void distribute();
 	void paint();
@@ -95,4 +95,4 @@ protected:
 bool operator==(Point<float> const& p1, Point<float> const& p2);
 std::size_t hash_value(Point<float> const& p);
 
-#endif // ABSTRACTSTIPPLER_H
+#endif // STIPPLER_H

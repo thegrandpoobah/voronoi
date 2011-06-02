@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "abstractstippler.h"
+#include "stippler.h"
 
 #include <GL/glu.h>
 
@@ -38,7 +38,7 @@ THE SOFTWARE.
 #undef max
 #endif
 
-CPUStippler::CPUStippler( std::string &image_path, const unsigned int points )
+Stippler::Stippler( std::string &image_path, const unsigned int points )
 : IStippler(),
 points(points),
 tileWidth(128), tileHeight(128),
@@ -52,7 +52,7 @@ dl_circle(0) {
 	createCircleDisplayList();
 }
 
-CPUStippler::~CPUStippler() {
+Stippler::~Stippler() {
 	::glDeleteLists( dl_circle, 1 );
 
 	delete[] framebuffer;
@@ -61,16 +61,16 @@ CPUStippler::~CPUStippler() {
 	delete[] vertsY;
 }
 
-void CPUStippler::useColour() {
+void Stippler::useColour() {
 	_useColour = true;
 }
 
-void CPUStippler::distribute() {
+void Stippler::distribute() {
 	createVoronoiDiagram();
 	redistributeStipples();
 }
 
-void CPUStippler::paint() {
+void Stippler::paint() {
 	// remember what the viewport used to look like
 	GLint vp[4];
 	::glGetIntegerv( GL_VIEWPORT, vp );
@@ -149,11 +149,11 @@ void CPUStippler::paint() {
 	::glEnable( GL_DEPTH_TEST );
 }
 
-float CPUStippler::getAverageDisplacement() {
+float Stippler::getAverageDisplacement() {
 	return displacement;
 }
 
-void CPUStippler::createInitialDistribution() {
+void Stippler::createInitialDistribution() {
 	// find initial distribution
 	boost::mt19937 rng;
 	boost::uniform_01<boost::mt19937, float> generator( rng );
@@ -177,7 +177,7 @@ void CPUStippler::createInitialDistribution() {
 	}
 }
 
-void CPUStippler::render( std::string &output_path ) {
+void Stippler::render( std::string &output_path ) {
 	using namespace std;
 
 	unsigned char r = 0, g = 0, b = 0;
@@ -207,7 +207,7 @@ void CPUStippler::render( std::string &output_path ) {
 	outputStream.close();
 }
 
-void CPUStippler::createCircleDisplayList() {
+void Stippler::createCircleDisplayList() {
 	static const GLint SEGMENTS = 32;
 
 	if ( dl_circle == 0 ) {
@@ -223,7 +223,7 @@ void CPUStippler::createCircleDisplayList() {
 	}
 }
 
-void CPUStippler::createVoronoiDiagram() {
+void Stippler::createVoronoiDiagram() {
 	VoronoiDiagramGenerator generator;
 
 	generator.generateVoronoi( vertsX, vertsY, points, 
@@ -254,7 +254,7 @@ void CPUStippler::createVoronoiDiagram() {
 	}
 }
 
-void CPUStippler::redistributeStipples() {
+void Stippler::redistributeStipples() {
 	// remember what the viewport used to look like
 	GLint params[4];
 	::glGetIntegerv( GL_VIEWPORT, params );
@@ -294,7 +294,7 @@ void CPUStippler::redistributeStipples() {
 #include "lodepng.h"
 #endif // OUTPUT_TILE
 
-void CPUStippler::renderCell( EdgeMap::iterator &cell, const CPUStippler::extents &extent ) {
+void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &extent ) {
 	// setup opengl state
 	::glMatrixMode( GL_PROJECTION );
 	::glLoadIdentity();
@@ -394,7 +394,7 @@ void CPUStippler::renderCell( EdgeMap::iterator &cell, const CPUStippler::extent
 #endif // OUTPUT_TILE
 }
 
-std::pair< Point<float>, float > CPUStippler::calculateCellCentroid( const CPUStippler::extents &extent ) {
+std::pair< Point<float>, float > Stippler::calculateCellCentroid( const Stippler::extents &extent ) {
 	unsigned char *fbPtr = framebuffer;
 
 	float area = 0.0f, areaDensity = 0.0f;
@@ -428,7 +428,7 @@ std::pair< Point<float>, float > CPUStippler::calculateCellCentroid( const CPUSt
 	return std::make_pair( pt, area / 255.0f );
 }
 
-CPUStippler::extents CPUStippler::getCellExtents( EdgeMap::iterator &cell ) {
+Stippler::extents Stippler::getCellExtents( EdgeMap::iterator &cell ) {
 	using std::numeric_limits;
 
 	extents extent;
