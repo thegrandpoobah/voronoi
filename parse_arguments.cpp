@@ -41,9 +41,9 @@ void showSamples() {
 	cout << "Sample usages" << endl << endl;
 	cout << "  voronoi [input] [output]" << endl;
 	cout << "\tCreates a stipple SVG image named [output] from [input] image with 4000\n\tstipple points in black and white." << endl;
-	cout << "  voronoi -s=16000 [input] [output]" << endl;
+	cout << "  voronoi -s 16000 [input] [output]" << endl;
 	cout << "\tCreates a stipple SVG image named [output] from [input] image with\n\t16000 stipple points in black and white." << endl;
-	cout << "  voronoi -c=true [input] [output]" << endl;
+	cout << "  voronoi -c true [input] [output]" << endl;
 	cout << "\tCreates a stipple SVG image named [output] from [input] image with 4000\n\tstipple points in colour." << endl;
 	cout << endl;
 }
