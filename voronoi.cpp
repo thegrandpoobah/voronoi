@@ -119,6 +119,13 @@ int main( int argc, char *argv[] ) {
 		if ( parameters->useColour ) {
 			stippler->useColour();
 		}
+		if ( parameters->noOverlap ) {
+			stippler->noOverlap();
+		}
+		if ( parameters->fixedRadius ) {
+			stippler->fixedRadius();
+		}
+		stippler->sizingFactor(parameters->sizingFactor);
 	} catch ( exception e ) {
 		cerr << e.what() << endl;
 
