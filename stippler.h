@@ -60,6 +60,9 @@ public:
 	void render( std::string &output_path );
 
 	void useColour();
+	void noOverlap();
+	void fixedRadius();
+	void sizingFactor(float sizingFactor);
 protected:
 	void createInitialDistribution();
 	void createVoronoiDiagram();
@@ -69,7 +72,7 @@ protected:
 	void redistributeStipples();
 
 	void renderCell( EdgeMap::iterator &cell, const extents &extent );
-	std::pair< Point<float>, float > calculateCellCentroid( const extents &extent );
+	std::pair< Point<float>, float > calculateCellCentroid( EdgeMap::iterator &cell, const extents &extent );
 
 	// this is just for the front end
 	void createCircleDisplayList();
@@ -89,7 +92,11 @@ protected:
 	Bitmap image;
 
 	unsigned int tileWidth, tileHeight;
+
 	bool _useColour;
+	bool _noOverlap;
+	bool _fixedRadius;
+	bool _sizingFactor;
 };
 
 bool operator==(Point<float> const& p1, Point<float> const& p2);

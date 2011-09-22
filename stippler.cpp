@@ -65,6 +65,18 @@ void Stippler::useColour() {
 	_useColour = true;
 }
 
+void Stippler::noOverlap() {
+	_noOverlap = true;
+}
+
+void Stippler::fixedRadius() {
+	_fixedRadius = true;
+}
+
+void Stippler::sizingFactor(float sizingFactor) {
+	_sizingFactor = sizingFactor;
+}
+
 void Stippler::distribute() {
 	createVoronoiDiagram();
 	redistributeStipples();
@@ -139,7 +151,7 @@ void Stippler::paint() {
 	::glColor3d( 0.0, 1.0, 0.0 );
 	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
 		for ( EdgeList::iterator value_iter = key_iter->second.begin(); value_iter != key_iter->second.end(); ++value_iter ) {
-		::glVertex2f( value_iter->begin.x, value_iter->begin.y );
+			::glVertex2f( value_iter->begin.x, value_iter->begin.y );
 			::glVertex2f( value_iter->end.x, value_iter->end.y );
 		}
 	}
@@ -193,13 +205,22 @@ void Stippler::render( std::string &output_path ) {
 	outputStream << "<?xml version=\"1.0\" ?>" << endl;
 	outputStream << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" << endl;
 	outputStream << "<svg width=\"" << image.getWidth() << "\" height=\"" << image.getHeight() << "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" << endl;
+	
+	float radius;
 	for ( unsigned int i = 0; i < points; ++i ) {
 
 		if ( _useColour ) {
 			image.getColour((unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b);
 		}
 
-		outputStream << "<circle cx=\"" << vertsX[i] << "\" cy=\"" << vertsY[i] << "\" r=\"" << radii[i] << "\" fill=\"rgb(" << (int)r << "," << (int)g << "," << (int)b << ")\" />" << endl;
+		if (_fixedRadius) {
+			radius = 0.5f; // gives circles with 1px diameter
+		} else {
+			radius = radii[i];
+		}
+		radius *= _sizingFactor;
+
+		outputStream << "<circle cx=\"" << vertsX[i] << "\" cy=\"" << vertsY[i] << "\" r=\"" << radius << "\" fill=\"rgb(" << (int)r << "," << (int)g << "," << (int)b << ")\" />" << endl;
 	}
 //stroke=\"black\" stroke-width=\"1\" 
 	outputStream << "</svg>" << endl;
@@ -267,9 +288,9 @@ void Stippler::redistributeStipples() {
 		extents extent = getCellExtents( key_iter );
 
 		renderCell( key_iter, extent );
-		std::pair< Point<float>, float > centroid = calculateCellCentroid( extent ); // must be implemented by derived classes
+		std::pair< Point<float>, float > centroid = calculateCellCentroid( key_iter, extent );
 
-		float rad = ::sqrt( centroid.second / PI );
+		float rad = centroid.second;
 		if ( !_isnan( rad ) ) {
 			radii[j] = rad;
 		} else {
@@ -303,7 +324,7 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 	::glMatrixMode( GL_MODELVIEW );
 	::glLoadIdentity();
 
-	::glClearColor(	0.0, 0.0, 0.0, 0.0 );
+	::glClearColor(	0.0, 0.0, 0.0, 1.0 );
 	::glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	::glDisable( GL_DEPTH_TEST );
@@ -315,7 +336,7 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 	// cover the entire colour buffer with the texture
 	::glEnable( GL_TEXTURE_2D );
 	::glBindTexture( GL_TEXTURE_2D, image.createGLTexture() );
-	::glColor3d( 1.0, 1.0, 1.0 );
+	::glColor4d( 1.0, 1.0, 1.0, 1.0 );
 
 	::glBegin( GL_QUADS );
 	::glTexCoord2f( extent.minX, extent.minY ); ::glVertex2f( extent.minX, extent.minY );
@@ -362,7 +383,7 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 		::glClipPlane( GL_CLIP_PLANE0, plane );
 
 		// write out 0 to entire surface, note that clipping will kill most of it
-		::glColor4d( 0.0, 0.0, 1.0, 1.0 );
+		::glColor4d( 0.0, 0.0, 0.0, 0.0 );
 		::glBegin( GL_QUADS );
 		::glVertex2f( extent.minX, extent.minY );
 		::glVertex2f( extent.minX, extent.maxY );
@@ -371,6 +392,9 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 		::glEnd();
 	}
 	::glDisable( GL_CLIP_PLANE0 );
+
+	::glReadBuffer( GL_BACK );
+	::glReadPixels( 0, 0, tileWidth, tileHeight, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer );
 
 #ifdef _DEBUG
 	::glColor4d( 0.0, 1.0, 1.0, 1.0 );
@@ -384,9 +408,6 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 
 	::glEnable( GL_DEPTH_TEST );
 
-	::glReadBuffer( GL_BACK );
-	::glReadPixels( 0, 0, tileWidth, tileHeight, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer );
-
 #ifdef OUTPUT_TILE
 	std::vector<unsigned char> out;
 	LodePNG::encode( out, framebuffer, tileWidth, tileHeight );
@@ -394,10 +415,11 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 #endif // OUTPUT_TILE
 }
 
-std::pair< Point<float>, float > Stippler::calculateCellCentroid( const Stippler::extents &extent ) {
+std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::iterator &cell, const Stippler::extents &extent ) {
 	unsigned char *fbPtr = framebuffer;
 
-	float area = 0.0f, areaDensity = 0.0f;
+	float area, maxArea; 
+	float areaDensity = 0.0f, maxAreaDensity = 0.0f;
 	float xSum = 0.0f;
 	float ySum = 0.0f;
 
@@ -411,21 +433,53 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( const Stippler
 		xCurrent = extent.minX;
 		for ( unsigned int x = 0; x < tileWidth; ++x, xCurrent += xStep ) {
 			float density = (float)(*fbPtr);
-			fbPtr+=4;
 
 			areaDensity += density;
+			if ( *(fbPtr+3) == 255 ) {
+				maxAreaDensity += 255.0f;
+			}
 			xSum += density * xCurrent;
 			ySum += density * ( extent.maxY - ( yCurrent - extent.minY ) );
+
+			fbPtr+=4;
 		}
 	}
 
-	area = areaDensity * xStep * yStep;
+	area = areaDensity * xStep * yStep / 255.0f;
+	maxArea = maxAreaDensity * xStep * yStep / 255.0f;
 
 	Point<float> pt;
 	pt.x = xSum / areaDensity;
 	pt.y = ySum / areaDensity;
 
-	return std::make_pair( pt, area / 255.0f );
+	float closest = std::numeric_limits<float>::max(),
+		  farthest = std::numeric_limits<float>::min(),
+		  distance;
+	float x0 = pt.x, y0 = pt.y,
+	      x1, x2, y1, y2;
+
+	for ( EdgeList::iterator value_iter = cell->second.begin(); value_iter != cell->second.end(); ++value_iter ) {
+		x1 = value_iter->begin.x; x2 = value_iter->end.x;
+		y1 = value_iter->begin.y; y2 = value_iter->end.y;
+
+		distance = ::abs( ( x2 - x1 ) * ( y1 - y0 ) - ( x1 - x0 ) * ( y2 - y1 ) ) / ::sqrt( ::pow( x2 - x1, 2.0f ) + ::pow( y2 - y1, 2.0f ) );
+		if ( closest > distance ) {
+			closest = distance;
+		}
+		if ( farthest < distance ) {
+			farthest = distance;
+		}
+	}
+
+	float radius;
+	if (_noOverlap) {
+		radius = closest;
+	} else {
+		radius = farthest;
+	}
+	radius *= area / maxArea;
+
+	return std::make_pair( pt, radius );
 }
 
 Stippler::extents Stippler::getCellExtents( EdgeMap::iterator &cell ) {
