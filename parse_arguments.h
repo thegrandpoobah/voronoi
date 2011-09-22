@@ -27,6 +27,7 @@ THE SOFTWARE.
 #include <string>
 #include <vector>
 #include <memory>
+#include <limits>
 
 struct StipplingParameters {
 	std::string inputFile;
@@ -35,12 +36,18 @@ struct StipplingParameters {
 	float threshold;
 	bool createLogs;
 	bool useColour;
+	bool noOverlap;
+	bool fixedRadius;
+	float sizingFactor;
 
 	StipplingParameters() {
 		points = 4000;
 		threshold = 0.1f;
 		createLogs = false;
 		useColour = false;
+		noOverlap = false;
+		fixedRadius = false;
+		sizingFactor = 1.05f;
 	}
 };
 

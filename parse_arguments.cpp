@@ -43,7 +43,7 @@ void showSamples() {
 	cout << "\tCreates a stipple SVG image named [output] from [input] image with 4000\n\tstipple points in black and white." << endl;
 	cout << "  voronoi -s 16000 [input] [output]" << endl;
 	cout << "\tCreates a stipple SVG image named [output] from [input] image with\n\t16000 stipple points in black and white." << endl;
-	cout << "  voronoi -c true [input] [output]" << endl;
+	cout << "  voronoi -c [input] [output]" << endl;
 	cout << "\tCreates a stipple SVG image named [output] from [input] image with 4000\n\tstipple points in colour." << endl;
 	cout << endl;
 }
@@ -74,6 +74,9 @@ std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] ) {
 	options_description advancedOpts( "Advanced Options" );
 	advancedOpts.add_options()
 		( "threshold,t", value< float >()->default_value(0.1f, "0.1"), "How long to wait for Voronoi diagram to converge" )
+		( "no-overlap,n", "Ensure that stipple points do not overlap with each other" )
+		( "fixed-radius,f", "Fixed radius stipple points imply a significant loss of tonal properties" )
+		( "sizing-factor,z", value< float >()->default_value(1.05f, "1.05"), "The final stipple radius is multiplied by this factor" )
 		( "log,l", "Determines output verbosity" );
 
 	positional_options_description positional;
@@ -114,6 +117,13 @@ std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] ) {
 		params->threshold = vm["threshold"].as<float>();
 		params->createLogs = vm.count("log") > 0;
 		params->useColour = vm.count("colour-output") > 0;
+		params->noOverlap = vm.count("no-overlap") > 0;
+		params->fixedRadius = vm.count("fixed-radius") > 0;
+		if (params->fixedRadius) {
+			params->sizingFactor = 1.0f;
+		} else {
+			params->sizingFactor = vm["sizing-factor"].as<float>();
+		}
 
 		return params;
 	} catch ( exception e ) {
