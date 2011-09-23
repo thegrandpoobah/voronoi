@@ -96,7 +96,7 @@ protected:
 	bool _useColour;
 	bool _noOverlap;
 	bool _fixedRadius;
-	bool _sizingFactor;
+	float _sizingFactor;
 };
 
 bool operator==(Point<float> const& p1, Point<float> const& p2);
