@@ -38,13 +38,13 @@ THE SOFTWARE.
 #undef max
 #endif
 
-Stippler::Stippler( std::string &image_path, const unsigned int points )
+Stippler::Stippler( std::string &image_path, const StipplingParameters &parameters )
 : IStippler(),
-points(points),
+parameters(parameters),
 tileWidth(128), tileHeight(128),
 displacement(std::numeric_limits<float>::max()),
-vertsX(new float[points]), vertsY(new float[points]), radii(new float[points]),
-image(image_path), _useColour(false),
+vertsX(new float[parameters.points]), vertsY(new float[parameters.points]), radii(new float[parameters.points]),
+image(image_path),
 dl_circle(0) {
 	framebuffer = new unsigned char[tileWidth*tileHeight*4];
 
@@ -59,22 +59,6 @@ Stippler::~Stippler() {
 	delete[] radii;
 	delete[] vertsX;
 	delete[] vertsY;
-}
-
-void Stippler::useColour() {
-	_useColour = true;
-}
-
-void Stippler::noOverlap() {
-	_noOverlap = true;
-}
-
-void Stippler::fixedRadius() {
-	_fixedRadius = true;
-}
-
-void Stippler::sizingFactor(float sizingFactor) {
-	_sizingFactor = sizingFactor;
 }
 
 void Stippler::distribute() {
@@ -122,9 +106,9 @@ void Stippler::paint() {
 	::glColor3d( 0.0, 0.0, 0.0 );
 
 	unsigned char r = 0, g = 0, b = 0;
-	for ( unsigned int i = 0; i < points; ++i ) {
-		if (_useColour) {
-			image.getColour((unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b);
+	for ( unsigned int i = 0; i < parameters.points; ++i ) {
+		if ( parameters.useColour ) {
+			image.getColour( (unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b );
 		}
 
 		::glPushMatrix();
@@ -170,7 +154,7 @@ void Stippler::createInitialDistribution() {
 	boost::mt19937 rng;
 	boost::uniform_01<boost::mt19937, float> generator( rng );
 
-	for ( unsigned int i = 0; i < points; ) {
+	for ( unsigned int i = 0; i < parameters.points; ) {
 		float xC, yC;
 
 		xC = generator() * (float)image.getWidth();
@@ -207,18 +191,17 @@ void Stippler::render( std::string &output_path ) {
 	outputStream << "<svg width=\"" << image.getWidth() << "\" height=\"" << image.getHeight() << "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" << endl;
 	
 	float radius;
-	for ( unsigned int i = 0; i < points; ++i ) {
-
-		if ( _useColour ) {
+	for ( unsigned int i = 0; i < parameters.points; ++i ) {
+		if ( parameters.useColour ) {
 			image.getColour((unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b);
 		}
 
-		if (_fixedRadius) {
+		if ( parameters.fixedRadius ) {
 			radius = 0.5f; // gives circles with 1px diameter
 		} else {
 			radius = radii[i];
 		}
-		radius *= _sizingFactor;
+		radius *= parameters.sizingFactor;
 
 		outputStream << "<circle cx=\"" << vertsX[i] << "\" cy=\"" << vertsY[i] << "\" r=\"" << radius << "\" fill=\"rgb(" << (int)r << "," << (int)g << "," << (int)b << ")\" />" << endl;
 	}
@@ -247,7 +230,7 @@ void Stippler::createCircleDisplayList() {
 void Stippler::createVoronoiDiagram() {
 	VoronoiDiagramGenerator generator;
 
-	generator.generateVoronoi( vertsX, vertsY, points, 
+	generator.generateVoronoi( vertsX, vertsY, parameters.points, 
 		0.0f, (float)image.getWidth(), 0.0f, (float)image.getHeight(), 0.0f/*::sqrt(8.0f) + 0.1f*/ );
 
 	edges.clear();
@@ -472,7 +455,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	}
 
 	float radius;
-	if (_noOverlap) {
+	if ( parameters.noOverlap ) {
 		radius = closest;
 	} else {
 		radius = farthest;

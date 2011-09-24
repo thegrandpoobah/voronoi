@@ -39,16 +39,6 @@ struct StipplingParameters {
 	bool noOverlap;
 	bool fixedRadius;
 	float sizingFactor;
-
-	StipplingParameters() {
-		points = 4000;
-		threshold = 0.1f;
-		createLogs = false;
-		useColour = false;
-		noOverlap = false;
-		fixedRadius = false;
-		sizingFactor = 1.05f;
-	}
 };
 
 std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] );

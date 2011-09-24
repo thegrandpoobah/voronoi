@@ -55,6 +55,42 @@ THE SOFTWARE.
 #include "parse_arguments.h"
 #include "guicon.h"
 
+void write_configuration( std::ostream &output, const StipplingParameters &parameters ) {
+	using std::endl;
+	using std::abs;
+	using std::numeric_limits;
+
+	output << "Generating " << parameters.points << " stipples." << endl;
+	output << "Options: ";
+	if ( parameters.useColour ) {
+		output << "Coloured stipples";
+	} else {
+		output << "Black stipples";
+	}
+
+	if ( parameters.noOverlap ) {
+		output << ", Non-overlapping stipples";
+	} else {
+		output << ", overlapping stipples";
+	}
+
+	if ( parameters.fixedRadius ) {
+		output << ", Fixed radius";
+	} else {
+		output << ", Variable radius";
+	}
+
+	if ( abs( parameters.sizingFactor - 1.0f ) > numeric_limits<float>::epsilon() ) {
+		output << ", Sizing factor of " << parameters.sizingFactor;
+	}
+
+	if ( abs( parameters.threshold - 0.1f ) > numeric_limits<float>::epsilon() ) {
+		output << ", Displacement Threshold of " << parameters.threshold;
+	}
+
+	output << endl;
+}
+
 #ifdef WIN32
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow ) {
 #else 
@@ -115,30 +151,16 @@ int main( int argc, char *argv[] ) {
 	}
 
 	try {
-		stippler = auto_ptr<IStippler>( new Stippler( parameters->inputFile, parameters->points ) );
-		if ( parameters->useColour ) {
-			stippler->useColour();
-		}
-		if ( parameters->noOverlap ) {
-			stippler->noOverlap();
-		}
-		if ( parameters->fixedRadius ) {
-			stippler->fixedRadius();
-		}
-		stippler->sizingFactor(parameters->sizingFactor);
+		stippler = auto_ptr<IStippler>( new Stippler( parameters->inputFile, *( parameters.get() ) ) );
 	} catch ( exception e ) {
 		cerr << e.what() << endl;
 
 		return -1;
 	}
 
-	cout << "Generating " << parameters->points << " stipples." << endl;
-
+	write_configuration( cout, *(parameters.get()) );
 	if ( parameters->createLogs ) {
-		log << "Generating " << parameters->points << " stipples." << endl;
-
-		log << "Displacement Threshold is " << parameters->threshold << "." << endl;
-		cout << "Displacement Threshold is " << parameters->threshold << "." << endl;
+		write_configuration( log, *(parameters.get()) );
 	}
 
 	int iteration = 0;

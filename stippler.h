@@ -36,6 +36,7 @@ THE SOFTWARE.
 #include <boost/unordered_map.hpp>
 
 #include "istippler.h"
+#include "parse_arguments.h"
 #include "utility.h"
 #include "bitmap.h"
 
@@ -51,7 +52,7 @@ protected:
 		float maxY;
 	};
 public:
-	Stippler( std::string &image_path, const unsigned int points );
+	Stippler( std::string &image_path, const StipplingParameters &parameters );
 	~Stippler();
 
 	void distribute();
@@ -81,8 +82,6 @@ protected:
 
 	EdgeMap edges;
 
-	unsigned int points;
-
 	GLuint dl_circle;
 
 	float *vertsX, *vertsY;
@@ -93,10 +92,7 @@ protected:
 
 	unsigned int tileWidth, tileHeight;
 
-	bool _useColour;
-	bool _noOverlap;
-	bool _fixedRadius;
-	float _sizingFactor;
+	const StipplingParameters &parameters;
 };
 
 bool operator==(Point<float> const& p1, Point<float> const& p2);

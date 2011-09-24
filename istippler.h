@@ -32,11 +32,6 @@ public:
 	virtual void paint() = 0;
 	virtual float getAverageDisplacement() = 0;
 	virtual void render( std::string &output_path ) = 0;
-	
-	virtual void useColour() = 0;
-	virtual void noOverlap() = 0;
-	virtual void fixedRadius() = 0;
-	virtual void sizingFactor(float sizingFactor) = 0;
 };
 
 #endif // ISTIPPLER_H
