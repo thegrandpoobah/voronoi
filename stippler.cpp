@@ -33,11 +33,6 @@ THE SOFTWARE.
 
 #include "VoronoiDiagramGenerator.h"
 
-#ifdef WIN32
-#undef min
-#undef max
-#endif
-
 Stippler::Stippler( std::string &image_path, const StipplingParameters &parameters )
 : IStippler(),
 parameters(parameters),

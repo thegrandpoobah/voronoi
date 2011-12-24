@@ -23,12 +23,8 @@ THE SOFTWARE.
 
 #ifdef WIN32
 // needed by opengl
+#define NOMINMAX
 #include <windows.h>
-
-// remove stupidness
-#undef min
-#undef max
-
 #endif // WIN32
 
 // stl

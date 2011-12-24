@@ -1,10 +1,13 @@
 // This code module is derived from http://www.halcyon.com/~ast/dload/guicon.htm
 // With minor modifications from Sahab Yazdani
 
+#define NOMINMAX
 #include <windows.h>
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <io.h>
+
 #include <iostream>
 #include <fstream>
 

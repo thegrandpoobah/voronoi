@@ -25,6 +25,7 @@ THE SOFTWARE.
 #define STIPPLER_H
 
 #ifdef WIN32
+#define NOMINMAX
 #include <windows.h>
 #endif // WIN32
 
