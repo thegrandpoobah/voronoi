@@ -27,6 +27,8 @@ THE SOFTWARE.
 #include "bitmap.h"
 
 Bitmap::Bitmap( std::string &filename ) {
+	using std::ceil;
+
 	file = PNG::load( filename );
 
 	intensityMap = new unsigned char[file->w * file->h];
@@ -34,7 +36,7 @@ Bitmap::Bitmap( std::string &filename ) {
 
 	for (unsigned int y = 0; y < file->h; y++) {
 		for (unsigned int x = 0; x < file->w; x++, imPtr++, cPtr+=4) {
-			*imPtr = 255 - (unsigned char)std::ceil(((double)(*(cPtr)) * 0.2126 + (double)(*(cPtr+1)) * 0.7152 + (double)(*(cPtr+2)) * 0.0722));
+			*imPtr = 255 - (unsigned char)ceil(((float)(*(cPtr)) * 0.2126 + (float)(*(cPtr+1)) * 0.7152 + (float)(*(cPtr+2)) * 0.0722));
 		}
 	}
 }
@@ -44,11 +46,7 @@ Bitmap::~Bitmap() {
 	delete[] intensityMap;
 }
 
-double Bitmap::getIntensity( unsigned int x, unsigned int y ) {
-	return (double)getDiscreteIntensity(x,y)/255.0;
-}
-
-unsigned char Bitmap::getDiscreteIntensity( unsigned int x, unsigned int y ) {
+unsigned char Bitmap::getIntensity( unsigned int x, unsigned int y ) {
 	return intensityMap[y * file->w + x];
 }
 

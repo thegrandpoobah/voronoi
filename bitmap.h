@@ -38,8 +38,7 @@ public:
 	Bitmap( std::string &filename );
 	~Bitmap();
 
-	double getIntensity( unsigned int x, unsigned int y );
-	unsigned char getDiscreteIntensity( unsigned int x, unsigned int y );
+	unsigned char getIntensity( unsigned int x, unsigned int y );
 
 	void getColour( unsigned int x, unsigned int y, unsigned char &r, unsigned char &g, unsigned char &b );
 

@@ -57,11 +57,13 @@ float Stippler::getAverageDisplacement() {
 }
 
 void Stippler::createInitialDistribution() {
+	using std::ceil;
+
 	// find initial distribution
 	boost::mt19937 rng;
 	boost::uniform_01<boost::mt19937, float> generator( rng );
 
-	float w = image.getWidth(), h = image.getHeight();
+	float w = (float)image.getWidth(), h = (float)image.getHeight();
 	float xC, yC;
 
 	for ( unsigned int i = 0; i < parameters.points; ) {
@@ -69,7 +71,7 @@ void Stippler::createInitialDistribution() {
 		yC = generator() * h;
 
 		// do a nearest neighbour search on the vertices
-		if ( generator() <= image.getIntensity( (unsigned int)xC, (unsigned int)yC ) ) {
+		if ( ceil(generator() * 255.0f) <= (float)image.getIntensity( (unsigned int)xC, (unsigned int)yC ) ) {
 			vertsX[i] = xC;
 			vertsY[i] = yC;
 			radii[i] = 0.0f;
@@ -250,7 +252,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 			}
 
 			if (!outside) {
-				spotDensity = (float)image.getDiscreteIntensity((unsigned int)floor(xCurrent), (unsigned int)floor(yCurrent));
+				spotDensity = (float)image.getIntensity((unsigned int)floor(xCurrent), (unsigned int)floor(yCurrent));
 
 				areaDensity += spotDensity;
 				maxAreaDensity += 255.0f;
