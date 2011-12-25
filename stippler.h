@@ -78,6 +78,8 @@ protected:
 
 	// this is just for the front end
 	void createCircleDisplayList();
+private:
+	void clipAndFill( unsigned char *bitmap, const float projection[9], float insideX, float insideY, float Fx1, float Fy1, float Fx2, float Fy2);
 protected:
 	unsigned char *framebuffer;
 

@@ -289,9 +289,54 @@ void Stippler::redistributeStipples() {
 	::glViewport( params[0], params[1], params[2], params[3] );
 }
 
+//#define OUTPUT_TILE
 #ifdef OUTPUT_TILE
 #include "lodepng.h"
 #endif // OUTPUT_TILE
+
+void Stippler::clipAndFill( unsigned char *bitmap, const float projection[9], float FinsideX, float FinsideY, float Fx1, float Fy1, float Fx2, float Fy2) {
+	using std::floor;
+	using std::abs;
+
+	int x1 = (int)floor(Fx1 * projection[0] + Fy1 * projection[1] + projection[2] + 0.5f),
+		y1 = (int)floor(Fx1 * projection[3] + Fy1 * projection[4] + projection[5] + 0.5f),
+		x2 = (int)floor(Fx2 * projection[0] + Fy2 * projection[1] + projection[2] + 0.5f),
+		y2 = (int)floor(Fx2 * projection[3] + Fy2 * projection[4] + projection[5] + 0.5f),
+		insideX = (int)floor(FinsideX * projection[0] + FinsideY * projection[1] + projection[2] + 0.5f),
+		insideY = (int)floor(FinsideX * projection[3] + FinsideY * projection[4] + projection[5] + 0.5f);
+
+	// if the floating point version of the line collapsed down to one
+	// point, then just ignore it all
+	if (x1 - x2 == 0 && y1 - y2 ==0) {
+		return;
+	}
+
+	int line[3];
+	line[0] = -(y1 - y2);
+	line[1] = x1 - x2;
+	line[2] = (y1 - y2) * x1 - (x1 - x2) * y1;
+
+	// make sure the pixel falls on the right side of the clipping plane
+	if ( insideX * line[0] + insideY * line[1] + line[2] > 0 ) {
+		line[0] *= -1;
+		line[1] *= -1;
+		line[2] *= -1;
+	}
+
+	unsigned char *wp = bitmap + 3; // point to alpha channel
+	int x, y;
+
+	for ( y = 0; y < tileHeight; y++ ) {
+		for ( x = 0; x < tileWidth; x++ ) {
+			if ( *wp != 0 && x * line[0] + y * line[1] + line[2] >= 0 ) {
+				*wp = 0;
+			}
+			wp+=4;
+		}
+	}
+}
+
+unsigned int cellNumber = 0;
 
 void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &extent ) {
 	// setup opengl state
@@ -302,7 +347,7 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 	::glMatrixMode( GL_MODELVIEW );
 	::glLoadIdentity();
 
-	::glClearColor(	0.0, 0.0, 0.0, 1.0 );
+	::glClearColor(	0.0, 0.0, 0.0, 0.0 );
 	::glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	::glDisable( GL_DEPTH_TEST );
@@ -317,62 +362,39 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 	::glColor4d( 1.0, 1.0, 1.0, 1.0 );
 
 	::glBegin( GL_QUADS );
-	::glTexCoord2f( extent.minX, extent.minY ); ::glVertex2f( extent.minX, extent.minY );
-	::glTexCoord2f( extent.minX, extent.maxY ); ::glVertex2f( extent.minX, extent.maxY );
-	::glTexCoord2f( extent.maxX, extent.maxY ); ::glVertex2f( extent.maxX, extent.maxY );
-	::glTexCoord2f( extent.maxX, extent.minY ); ::glVertex2f( extent.maxX, extent.minY );
+	::glTexCoord2f( extent.minX, extent.maxY ); ::glVertex2f( extent.minX, extent.minY );
+	::glTexCoord2f( extent.minX, extent.minY ); ::glVertex2f( extent.minX, extent.maxY );
+	::glTexCoord2f( extent.maxX, extent.minY ); ::glVertex2f( extent.maxX, extent.maxY );
+	::glTexCoord2f( extent.maxX, extent.maxY ); ::glVertex2f( extent.maxX, extent.minY );
 	::glEnd();
 	::glDisable( GL_TEXTURE_2D );
 
-	// now clip out the regions that don't belong to this centroid
-	::glEnable( GL_CLIP_PLANE0 );
-	for ( EdgeList::iterator value_iter = cell->second.begin(); value_iter != cell->second.end(); ++value_iter ) {
-		// create equation of a plane
-		double x1, y1, z1, x2, y2, z2, x3, y3, z3;
-
-		x1 = (double)value_iter->begin.x;
-		y1 = (double)value_iter->begin.y;
-		z1 = 0.0;
-
-		x2 = (double)value_iter->end.x;
-		y2 = (double)value_iter->end.y;
-		z2 = 0.0;
-
-		x3 = (double)value_iter->end.x;
-		y3 = (double)value_iter->end.y;
-		z3 = 1.0;
-
-		double plane[4];
-
-		plane[0] = y1 * (z2 - z3) + y2 * (z3 - z1) + y3 * (z1 - z2) ;
-		plane[1] = z1 * (x2 - x3) + z2 * (x3 - x1) + z3 * (x1 - x2) ;
-		plane[2] = x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2) ;
-		plane[3] = -( x1 * (y2 * z3 - y3 * z2) + x2 * (y3 * z1 - y1 * z3) + x3 * (y1 * z2 - y2 * z1) );
-
-		// make sure the pixel falls on the right side of the clipping plane
-		if ( cell->first.x * plane[0] + cell->first.y * plane[1] + plane[3] > 0 ) {
-			plane[0] *= -1;
-			plane[1] *= -1;
-			plane[2] *= -1;
-			plane[3] *= -1;
-		}
-
-		// enable the clip plane
-		::glClipPlane( GL_CLIP_PLANE0, plane );
-
-		// write out 0 to entire surface, note that clipping will kill most of it
-		::glColor4d( 0.0, 0.0, 0.0, 0.0 );
-		::glBegin( GL_QUADS );
-		::glVertex2f( extent.minX, extent.minY );
-		::glVertex2f( extent.minX, extent.maxY );
-		::glVertex2f( extent.maxX, extent.maxY );
-		::glVertex2f( extent.maxX, extent.minY );
-		::glEnd();
-	}
-	::glDisable( GL_CLIP_PLANE0 );
-
 	::glReadBuffer( GL_BACK );
 	::glReadPixels( 0, 0, tileWidth, tileHeight, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer );
+
+	// create projection
+	float scaleX =(float)(tileWidth - 1)/(extent.maxX - extent.minX),
+		scaleY = (float)(tileHeight - 1)/(extent.maxY - extent.minY);
+	float projection[9] = {scaleX, 0, -extent.minX * scaleX,
+		                   0, scaleY, -extent.minY * scaleY,
+						   0, 0, 1};
+
+	// draw the polygon
+	for ( EdgeList::iterator value_iter = cell->second.begin(); value_iter != cell->second.end(); ++value_iter ) {
+		clipAndFill(framebuffer, projection, 
+			cell->first.x, cell->first.y, 
+			value_iter->begin.x, value_iter->begin.y, 
+			value_iter->end.x, value_iter->end.y);
+	}
+
+#ifdef OUTPUT_TILE
+	std::vector<unsigned char> out;
+	std::stringstream fname;
+
+	fname << "tile" << cellNumber++ << ".png";
+	LodePNG::encode( out, framebuffer, tileWidth, tileHeight );
+	LodePNG::saveFile( out, fname.str() );
+#endif // OUTPUT_TILE
 
 #ifdef _DEBUG
 	::glColor4d( 0.0, 1.0, 1.0, 1.0 );
@@ -385,53 +407,52 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 #endif // _DEBUG
 
 	::glEnable( GL_DEPTH_TEST );
-
-#ifdef OUTPUT_TILE
-	std::vector<unsigned char> out;
-	LodePNG::encode( out, framebuffer, tileWidth, tileHeight );
-	LodePNG::saveFile( out, std::string( "tile.png" ) );
-#endif // OUTPUT_TILE
 }
 
 std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::iterator &cell, const Stippler::extents &extent ) {
-	unsigned char *fbPtr = framebuffer;
+	using std::make_pair;
+	using std::numeric_limits;
 
-	float area, maxArea; 
-	float areaDensity = 0.0f, maxAreaDensity = 0.0f;
-	float xSum = 0.0f;
-	float ySum = 0.0f;
+	unsigned char *fbPtr = framebuffer;
+	unsigned int x, y;
 
 	float xStep = ( extent.maxX - extent.minX ) / (float)tileWidth;
 	float yStep = ( extent.maxY - extent.minY ) / (float)tileHeight;
+
+	float spotDensity, areaDensity = 0.0f, maxAreaDensity = 0.0f;
+	float xSum = 0.0f;
+	float ySum = 0.0f;
+
 	float xCurrent;
 	float yCurrent;
 
 	yCurrent = extent.minY;
-	for ( unsigned int y = 0; y < tileHeight; ++y, yCurrent+=yStep ) {
+	for ( y = 0; y < tileHeight; ++y, yCurrent+=yStep ) {
 		xCurrent = extent.minX;
-		for ( unsigned int x = 0; x < tileWidth; ++x, xCurrent += xStep ) {
-			float density = (float)(*fbPtr);
 
-			areaDensity += density;
-			if ( *(fbPtr+3) == 255 ) {
+		for ( x = 0; x < tileWidth; ++x, xCurrent += xStep ) {
+			if ( *(fbPtr + 3) == 255 ) {
+				spotDensity = (float)(*fbPtr);
+
+				areaDensity += spotDensity;
 				maxAreaDensity += 255.0f;
+				xSum += spotDensity * xCurrent;
+				ySum += spotDensity * yCurrent;
 			}
-			xSum += density * xCurrent;
-			ySum += density * ( extent.maxY - ( yCurrent - extent.minY ) );
 
 			fbPtr+=4;
 		}
 	}
 
-	area = areaDensity * xStep * yStep / 255.0f;
-	maxArea = maxAreaDensity * xStep * yStep / 255.0f;
+	float area = areaDensity * xStep * yStep / 255.0f;
+	float maxArea = maxAreaDensity * xStep * yStep / 255.0f;
 
 	Point<float> pt;
 	pt.x = xSum / areaDensity;
 	pt.y = ySum / areaDensity;
 
-	float closest = std::numeric_limits<float>::max(),
-		  farthest = std::numeric_limits<float>::min(),
+	float closest = numeric_limits<float>::max(),
+		  farthest = numeric_limits<float>::min(),
 		  distance;
 	float x0 = pt.x, y0 = pt.y,
 	      x1, x2, y1, y2;
@@ -457,7 +478,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	}
 	radius *= area / maxArea;
 
-	return std::make_pair( pt, radius );
+	return make_pair( pt, radius );
 }
 
 Stippler::extents Stippler::getCellExtents( EdgeMap::iterator &cell ) {
