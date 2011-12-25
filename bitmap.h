@@ -29,8 +29,6 @@ THE SOFTWARE.
 #include <windows.h>
 #endif
 
-#include <GL/gl.h>
-
 #include <string>
 
 #include "picopng.h"

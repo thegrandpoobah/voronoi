@@ -37,19 +37,11 @@ THE SOFTWARE.
 // boost
 #include <boost/timer.hpp>
 
-// SDL
-#include <SDL.h>
-
-// OpenGL
-#include <GL/gl.h>
-#include <GL/glu.h>
-
 // local
 #include "bitmap.h"
 #include "istippler.h"
 #include "stippler.h"
 #include "parse_arguments.h"
-#include "guicon.h"
 
 void write_configuration( std::ostream &output, const StipplingParameters &parameters ) {
 	using std::endl;
@@ -87,17 +79,7 @@ void write_configuration( std::ostream &output, const StipplingParameters &param
 	output << endl;
 }
 
-#ifdef WIN32
-int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow ) {
-#else 
 int main( int argc, char *argv[] ) {
-#endif // WIN32
-#ifdef WIN32
-	int argc = __argc;
-	char **argv = __argv;
-
-	RedirectIOToConsole();
-#endif // WIN32
 	using std::auto_ptr;
 	using std::exception;
 	using std::ofstream;
@@ -120,24 +102,6 @@ int main( int argc, char *argv[] ) {
 	} catch ( exception e ) {
 		return -1;
 	}
-
-	::SDL_Init( SDL_INIT_VIDEO );
-
-	::SDL_WM_SetCaption( "Weighted Voronoi Stippling", "Weighted Voronoi Stippling" );
-
-	::SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-	::SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-	::SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-	::SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
-	::SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
-	::SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
-	::SDL_Surface *screen = ::SDL_SetVideoMode( 640, 480, 32, SDL_OPENGL | SDL_HWSURFACE );
-
-	::glClearColor( 0.0, 0.0, 0.0, 0.0 );
-	::glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-	::SDL_GL_SwapBuffers();
 
 	auto_ptr<IStippler> stippler;
 
@@ -171,10 +135,6 @@ int main( int argc, char *argv[] ) {
 			cout << "Iteration " << iteration << " completed in " << profiler.elapsed() << " seconds." << endl;
 		}
 
-		stippler->paint();
-	
-		::SDL_GL_SwapBuffers();
-
 		t = stippler->getAverageDisplacement();
 
 		if ( parameters->createLogs ) {
@@ -195,8 +155,6 @@ int main( int argc, char *argv[] ) {
 	if ( parameters->createLogs ) {
 		log.close();
 	}
-
-	::SDL_Quit();
 
 	return 0;
 }

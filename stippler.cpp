@@ -23,8 +23,6 @@ THE SOFTWARE.
 
 #include "stippler.h"
 
-#include <GL/glu.h>
-
 #include <fstream>
 #include <sstream>
 #include <limits>
@@ -39,15 +37,11 @@ parameters(parameters),
 tileWidth(128), tileHeight(128),
 displacement(std::numeric_limits<float>::max()),
 vertsX(new float[parameters.points]), vertsY(new float[parameters.points]), radii(new float[parameters.points]),
-image(image_path),
-dl_circle(0) {
+image(image_path) {
 	createInitialDistribution();
-	createCircleDisplayList();
 }
 
 Stippler::~Stippler() {
-	::glDeleteLists( dl_circle, 1 );
-
 	delete[] radii;
 	delete[] vertsX;
 	delete[] vertsY;
@@ -56,81 +50,6 @@ Stippler::~Stippler() {
 void Stippler::distribute() {
 	createVoronoiDiagram();
 	redistributeStipples();
-}
-
-void Stippler::paint() {
-	// remember what the viewport used to look like
-	GLint vp[4];
-	::glGetIntegerv( GL_VIEWPORT, vp );
-	GLint vpWidth = vp[2], vpHeight = vp[3];
-	float aspect = (float)vpWidth/(float)vpHeight;
-	::glDisable( GL_DEPTH_TEST );
-
-	// setup opengl state
-	::glMatrixMode( GL_PROJECTION );
-	::glLoadIdentity();
-
-	// align everything so that it is centered
-	float orthoWidth;
-	float orthoHeight;
-	if ( aspect < 1.0f ) {
-		orthoWidth = (float)image.getWidth();
-		orthoHeight = (float)image.getWidth()*aspect;
-	} else {
-		orthoWidth = (float)image.getHeight()*1.0f/aspect;
-		orthoHeight = (float)image.getHeight();
-	}
-	float left = orthoWidth - (float)image.getWidth(); // >= 0
-	float top = orthoHeight - (float)image.getHeight(); // >= 0
-	::gluOrtho2D( -left/2.0f, orthoWidth - left/2.0f, orthoHeight - top/2.0f, -top/2.0f );
-
-	::glMatrixMode( GL_MODELVIEW );
-	::glLoadIdentity();
-
-	::glClearColor( 1.0, 1.0, 1.0, 0.0 );
-	::glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-	::glMatrixMode( GL_MODELVIEW );
-	::glColor3d( 0.0, 0.0, 0.0 );
-
-	unsigned char r = 0, g = 0, b = 0;
-	for ( unsigned int i = 0; i < parameters.points; ++i ) {
-		if ( parameters.useColour ) {
-			image.getColour( (unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b );
-		}
-
-		::glPushMatrix();
-		::glTranslatef( vertsX[i], vertsY[i], 0.0f );
-		::glScalef( radii[i], radii[i], 1.0f );
-		::glColor3ub( r, g, b );
-		::glCallList( dl_circle );
-		::glPopMatrix();
-	}
-
-#ifdef RENDER_PREVIOUS_ITERATION
-	::glColor3d( 0.0, 0.0, 1.0 );
-	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
-		::glPushMatrix();
-		::glTranslatef( key_iter->first.x, key_iter->first.y, 0.0f );
-		::glScalef( 2.0f, 2.0f, 1.0f );
-		::glCallList( dl_circle );
-		::glPopMatrix();
-	}
-#endif // RENDER_PREVIOUS_ITERATION
-
-#ifdef RENDER_VORONOI_EDGES
-	::glBegin( GL_LINES );
-	::glColor3d( 0.0, 1.0, 0.0 );
-	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
-		for ( EdgeList::iterator value_iter = key_iter->second.begin(); value_iter != key_iter->second.end(); ++value_iter ) {
-			::glVertex2f( value_iter->begin.x, value_iter->begin.y );
-			::glVertex2f( value_iter->end.x, value_iter->end.y );
-		}
-	}
-	::glEnd();
-#endif // RENDER_VORONOI_EDGES
-
-	::glEnable( GL_DEPTH_TEST );
 }
 
 float Stippler::getAverageDisplacement() {
@@ -198,22 +117,6 @@ void Stippler::render( std::string &output_path ) {
 	outputStream.close();
 }
 
-void Stippler::createCircleDisplayList() {
-	static const GLint SEGMENTS = 32;
-
-	if ( dl_circle == 0 ) {
-		dl_circle = ::glGenLists( 1 );
-
-		::glNewList( dl_circle, GL_COMPILE );
-
-		GLUquadric *quadric = ::gluNewQuadric();
-		::gluDisk( quadric, 0.0, 1.0, SEGMENTS, 1 );
-		::gluDeleteQuadric( quadric );
-
-		::glEndList();
-	}
-}
-
 void Stippler::createVoronoiDiagram() {
 	VoronoiDiagramGenerator generator;
 
@@ -270,12 +173,6 @@ void Stippler::redistributeStipples() {
 
 	displacement /= j; // average out the displacement
 }
-
-//#define OUTPUT_TILE
-#ifdef OUTPUT_TILE
-#include "lodepng.h"
-unsigned int cellNumber = 0;
-#endif // OUTPUT_TILE
 
 inline void Stippler::createProjection( const Stippler::extents &extent, float *projection ) {
 	float scaleX =(float)(tileWidth - 1)/(extent.maxX - extent.minX),

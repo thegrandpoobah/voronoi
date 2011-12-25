@@ -29,7 +29,6 @@ THE SOFTWARE.
 class IStippler {
 public:
 	virtual void distribute() = 0;
-	virtual void paint() = 0;
 	virtual float getAverageDisplacement() = 0;
 	virtual void render( std::string &output_path ) = 0;
 };

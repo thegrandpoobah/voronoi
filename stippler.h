@@ -29,8 +29,6 @@ THE SOFTWARE.
 #include <windows.h>
 #endif // WIN32
 
-#include <GL/gl.h>
-
 #include <string>
 #include <vector>
 
@@ -63,14 +61,8 @@ public:
 	~Stippler();
 
 	void distribute();
-	void paint();
 	float getAverageDisplacement();
 	void render( std::string &output_path );
-
-	void useColour();
-	void noOverlap();
-	void fixedRadius();
-	void sizingFactor(float sizingFactor);
 protected:
 	void createInitialDistribution();
 	void createVoronoiDiagram();
@@ -80,16 +72,11 @@ protected:
 	void redistributeStipples();
 
 	std::pair< Point<float>, float > calculateCellCentroid( EdgeMap::iterator &cell, const extents &extent );
-
-	// this is just for the front end
-	void createCircleDisplayList();
 protected:
 	void createProjection( const extents &extent, float *projection );
 	line createClipLine( const float projection[9], float insideX, float insideY, float Fx1, float Fy1, float Fx2, float Fy2 );
 protected:
 	EdgeMap edges;
-
-	GLuint dl_circle;
 
 	float *vertsX, *vertsY;
 	float *radii;
