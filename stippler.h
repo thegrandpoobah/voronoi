@@ -52,9 +52,9 @@ protected:
 	};
 
 	struct line {
-		int a;
-		int b;
-		int c;
+		float a;
+		float b;
+		float c;
 	};
 public:
 	Stippler( std::string &image_path, const StipplingParameters &parameters );
@@ -72,9 +72,7 @@ protected:
 	void redistributeStipples();
 
 	std::pair< Point<float>, float > calculateCellCentroid( EdgeMap::iterator &cell, const extents &extent );
-protected:
-	void createProjection( const extents &extent, float *projection );
-	line createClipLine( const float projection[9], float insideX, float insideY, float Fx1, float Fy1, float Fx2, float Fy2 );
+	line createClipLine( float insideX, float insideY, float Fx1, float Fy1, float Fx2, float Fy2 );
 protected:
 	EdgeMap edges;
 

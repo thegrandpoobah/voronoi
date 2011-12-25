@@ -174,50 +174,28 @@ void Stippler::redistributeStipples() {
 	displacement /= j; // average out the displacement
 }
 
-inline void Stippler::createProjection( const Stippler::extents &extent, float *projection ) {
-	float scaleX =(float)(tileWidth - 1)/(extent.maxX - extent.minX),
-		scaleY = (float)(tileHeight - 1)/(extent.maxY - extent.minY);
-	
-	projection[0] = scaleX;
-	projection[1] = 0.0f;
-	projection[2] = -extent.minX * scaleX;
-	projection[3] = 0.0f;
-	projection[4] = scaleY;
-	projection[5] = -extent.minY * scaleY;
-	projection[6] = 0.0f;
-	projection[7] = 0.0f;
-	projection[8] = 1.0f;
-}
-
-inline Stippler::line Stippler::createClipLine( const float projection[9], float FinsideX, float FinsideY, float Fx1, float Fy1, float Fx2, float Fy2 ) {
-	using std::floor;
+inline Stippler::line Stippler::createClipLine( float FinsideX, float FinsideY, float Fx1, float Fy1, float Fx2, float Fy2 ) {
 	using std::abs;
-
-	int x1 = (int)floor(Fx1 * projection[0] + Fy1 * projection[1] + projection[2] + 0.5f),
-		y1 = (int)floor(Fx1 * projection[3] + Fy1 * projection[4] + projection[5] + 0.5f),
-		x2 = (int)floor(Fx2 * projection[0] + Fy2 * projection[1] + projection[2] + 0.5f),
-		y2 = (int)floor(Fx2 * projection[3] + Fy2 * projection[4] + projection[5] + 0.5f),
-		insideX = (int)floor(FinsideX * projection[0] + FinsideY * projection[1] + projection[2] + 0.5f),
-		insideY = (int)floor(FinsideX * projection[3] + FinsideY * projection[4] + projection[5] + 0.5f);
+	using std::numeric_limits;
 
 	Stippler::line l;
 
 	// if the floating point version of the line collapsed down to one
 	// point, then just ignore it all
-	if (x1 - x2 == 0 && y1 - y2 ==0) {
-		l.a = 0;
-		l.b = 0;
-		l.c = 0;
+	if (abs(Fx1 - Fx2) < std::numeric_limits<float>::epsilon() && abs(Fy1 - Fy2) < std::numeric_limits<float>::epsilon()) {
+		l.a = .0f;
+		l.b = .0f;
+		l.c = .0f;
 
 		return l;
 	}
 
-	l.a = -(y1 - y2);
-	l.b = x1 - x2;
-	l.c = (y1 - y2) * x1 - (x1 - x2) * y1;
+	l.a = -(Fy1 - Fy2);
+	l.b = Fx1 - Fx2;
+	l.c = (Fy1 - Fy2) * Fx1 - (Fx1 - Fx2) * Fy1;
 
 	// make sure the known inside point falls on the correct side of the clipping plane
-	if ( insideX * l.a + insideY * l.b + l.c > 0 ) {
+	if ( FinsideX * l.a + FinsideY * l.b + l.c > 0 ) {
 		l.a *= -1;
 		l.b *= -1;
 		l.c *= -1;
@@ -231,9 +209,8 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	using std::numeric_limits;
 	using std::vector;
 	using std::floor;
+	using std::abs;
 
-	float projection[9];
-	
 	vector<line> clipLines;
 
 	int x, y;
@@ -248,16 +225,13 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	float xCurrent;
 	float yCurrent;
 
-	createProjection(extent, projection);
-	
 	// compute the clip lines
 	for ( EdgeList::iterator value_iter = cell->second.begin(); value_iter != cell->second.end(); ++value_iter ) {
-		line l = createClipLine( projection, 
-			cell->first.x, cell->first.y, 
+		line l = createClipLine( cell->first.x, cell->first.y, 
 			value_iter->begin.x, value_iter->begin.y,
 			value_iter->end.x, value_iter->end.y );
 	
-		if (l.a == 0 && l.b == 0) {
+		if (l.a < numeric_limits<float>::epsilon() && abs(l.b) < numeric_limits<float>::epsilon()) {
 			continue;
 		}
 
@@ -269,7 +243,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 			// a point is outside of the polygon if it is outside of all clipping planes
 			bool outside = false;
 			for ( vector<line>::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {
-				if ( x * iter->a + y * iter->b + iter->c >= 0 ) {
+				if ( xCurrent * iter->a + yCurrent * iter->b + iter->c >= 0 ) {
 					outside = true;
 					break;
 				}
