@@ -52,6 +52,12 @@ protected:
 		float maxX;
 		float maxY;
 	};
+
+	struct line {
+		int a;
+		int b;
+		int c;
+	};
 public:
 	Stippler( std::string &image_path, const StipplingParameters &parameters );
 	~Stippler();
@@ -78,8 +84,10 @@ protected:
 
 	// this is just for the front end
 	void createCircleDisplayList();
-private:
-	void clipAndFill( unsigned char *bitmap, const float projection[9], float insideX, float insideY, float Fx1, float Fy1, float Fx2, float Fy2);
+protected:
+	void createProjection( const extents &extent, float *projection );
+	line createClipLine( const float projection[9], float insideX, float insideY, float Fx1, float Fy1, float Fx2, float Fy2 );
+	void fillTile( unsigned char *bitmap, const float projection[9], const extents &extent, std::vector<line> &clipLines );
 protected:
 	unsigned char *framebuffer;
 
