@@ -87,10 +87,6 @@ void Stippler::paint() {
 	::glMatrixMode( GL_MODELVIEW );
 	::glLoadIdentity();
 
-	::glMatrixMode( GL_TEXTURE );
-	::glLoadIdentity();
-	::glScaled( 1.0/(double)image.getGLWidth(), 1.0/(double)image.getGLHeight(), 1.0 );
-
 	::glClearColor( 1.0, 1.0, 1.0, 0.0 );
 	::glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -154,13 +150,13 @@ void Stippler::createInitialDistribution() {
 
 		// do a nearest neighbour search on the vertices
 		if ( generator() <= image.getIntensity( (unsigned int)xC, (unsigned int)yC ) ) {
-			if ( image.getDiscreteIntensity( (unsigned int)xC, (unsigned int)yC ) > 25 ) {
+			//if ( image.getDiscreteIntensity( (unsigned int)xC, (unsigned int)yC ) > 25 ) {
 				vertsX[i] = xC;
 				vertsY[i] = yC;
 				radii[i] = 0.0f;
 
 				i++;
-			}
+			//}
 		}
 	}
 }
@@ -251,12 +247,6 @@ void Stippler::createVoronoiDiagram() {
 }
 
 void Stippler::redistributeStipples() {
-	// remember what the viewport used to look like
-	GLint params[4];
-	::glGetIntegerv( GL_VIEWPORT, params );
-
-	::glViewport( 0, 0, tileWidth, tileHeight );
-
 	unsigned int j = 0;
 	displacement = 0.0f;
 	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
@@ -280,9 +270,6 @@ void Stippler::redistributeStipples() {
 	}
 
 	displacement /= j; // average out the displacement
-
-	// undo the changes we made to the viewport
-	::glViewport( params[0], params[1], params[2], params[3] );
 }
 
 //#define OUTPUT_TILE
@@ -347,6 +334,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	using std::make_pair;
 	using std::numeric_limits;
 	using std::vector;
+	using std::floor;
 
 	float projection[9];
 	
@@ -380,8 +368,8 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 		clipLines.push_back(l);
 	}
 
-	for ( y = 0, yCurrent = extent.minY; y < tileHeight; ++y, yCurrent += yStep ) {
-		for ( x = 0, xCurrent = extent.minX; x < tileWidth; ++x, xCurrent += xStep ) {
+	for ( y = 0, yCurrent = extent.minY; y < (int)tileHeight; ++y, yCurrent += yStep ) {
+		for ( x = 0, xCurrent = extent.minX; x < (int)tileWidth; ++x, xCurrent += xStep ) {
 			// something is outside of the polygon, if a point is outside of all clipping planes
 			bool outside = false;
 			for ( vector<line>::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {
@@ -392,7 +380,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 			}
 
 			if (!outside) {
-				spotDensity = (float)image.getDiscreteIntensity(std::floor(xCurrent), std::floor(yCurrent));
+				spotDensity = (float)image.getDiscreteIntensity((unsigned int)floor(xCurrent), (unsigned int)floor(yCurrent));
 
 				areaDensity += spotDensity;
 				maxAreaDensity += 255.0f;

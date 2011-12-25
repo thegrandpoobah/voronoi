@@ -47,15 +47,9 @@ public:
 
 	unsigned int getWidth();
 	unsigned int getHeight();
-
-	unsigned int getGLWidth();
-	unsigned int getGLHeight();
-
-	GLuint createGLTexture();
 private:
 	PNG::PNGFile *file;
-	unsigned int glWidth, glHeight;
-	GLuint glTex;
+	unsigned char *intensityMap;
 };
 
 #endif // BITMAP_H

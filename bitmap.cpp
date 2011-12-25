@@ -26,25 +26,22 @@ THE SOFTWARE.
 
 #include "bitmap.h"
 
-Bitmap::Bitmap( std::string &filename ) : 
-glWidth(1), glHeight(1), glTex(0) {
+Bitmap::Bitmap( std::string &filename ) {
 	file = PNG::load( filename );
 
-	while ( glWidth < getWidth() || glHeight < getHeight() ) {
-		if ( glWidth < getWidth() ) {
-			glWidth *= 2;
-		}
-		if ( glHeight < getHeight() ) {
-			glHeight *= 2;
+	intensityMap = new unsigned char[file->w * file->h];
+	unsigned char *imPtr = intensityMap, *cPtr = file->data;
+
+	for (unsigned int y = 0; y < file->h; y++) {
+		for (unsigned int x = 0; x < file->w; x++, imPtr++, cPtr+=4) {
+			*imPtr = 255 - (unsigned char)std::ceil(((double)(*(cPtr)) * 0.2126 + (double)(*(cPtr+1)) * 0.7152 + (double)(*(cPtr+2)) * 0.0722));
 		}
 	}
 }
 
 Bitmap::~Bitmap() {
-	if ( glTex != 0 ) {
-		::glDeleteTextures( 1, &glTex );
-	}
 	PNG::freePng( file );
+	delete[] intensityMap;
 }
 
 double Bitmap::getIntensity( unsigned int x, unsigned int y ) {
@@ -52,11 +49,7 @@ double Bitmap::getIntensity( unsigned int x, unsigned int y ) {
 }
 
 unsigned char Bitmap::getDiscreteIntensity( unsigned int x, unsigned int y ) {
-	unsigned char r, g, b;
-
-	getColour(x, y, r, g, b);
-
-	return 255 - (unsigned char)std::ceil(((double)r * 0.2126 + (double)g * 0.7152 + (double)b * 0.0722));
+	return intensityMap[y * file->w + x];
 }
 
 void Bitmap::getColour( unsigned int x, unsigned int y, unsigned char &r, unsigned char &g, unsigned char &b ) {
@@ -72,42 +65,5 @@ unsigned int Bitmap::getWidth() {
 
 unsigned int Bitmap::getHeight() {
 	return file->h;
-}
-
-unsigned int Bitmap::getGLWidth() {
-	return glWidth;
-}
-
-unsigned int Bitmap::getGLHeight() {
-	return glHeight;
-}
-
-GLuint Bitmap::createGLTexture( ) {
-	if ( glTex == 0 ) {
-		// create an appropriately sized texture (must be powers of 2)
-		unsigned int texSizeW = getGLWidth();
-		unsigned int texSizeH = getGLHeight();
-
-		unsigned char *target = new unsigned char[texSizeW*texSizeH];
-		::memset( target, 0, sizeof( unsigned char ) * texSizeW * texSizeH );
-		unsigned char *targetPtr = target;
-
-		for ( unsigned int y = 0; y < getHeight(); ++y ) {
-			for ( unsigned int x = 0; x < getWidth(); ++x ) {
-				*targetPtr = getDiscreteIntensity( x, y );
-				targetPtr++;
-			}
-			targetPtr += texSizeW - getWidth();
-		}
-
-		::glGenTextures( 1, &glTex );
-		::glBindTexture( GL_TEXTURE_2D, glTex );
-		::glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE8, texSizeW, texSizeH, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, target );
-		::glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-		::glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-
-		delete[] target;
-	}
-	return glTex;
 }
 
