@@ -41,8 +41,6 @@ displacement(std::numeric_limits<float>::max()),
 vertsX(new float[parameters.points]), vertsY(new float[parameters.points]), radii(new float[parameters.points]),
 image(image_path),
 dl_circle(0) {
-	framebuffer = new unsigned char[tileWidth*tileHeight*4];
-
 	createInitialDistribution();
 	createCircleDisplayList();
 }
@@ -50,7 +48,6 @@ dl_circle(0) {
 Stippler::~Stippler() {
 	::glDeleteLists( dl_circle, 1 );
 
-	delete[] framebuffer;
 	delete[] radii;
 	delete[] vertsX;
 	delete[] vertsY;
@@ -265,7 +262,6 @@ void Stippler::redistributeStipples() {
 	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
 		extents extent = getCellExtents( key_iter );
 
-		renderCell( key_iter, extent );
 		std::pair< Point<float>, float > centroid = calculateCellCentroid( key_iter, extent );
 
 		float rad = centroid.second;
@@ -347,51 +343,29 @@ inline Stippler::line Stippler::createClipLine( const float projection[9], float
 	return l;
 }
 
-inline void Stippler::fillTile( unsigned char *bitmap, const float projection[9], const Stippler::extents &extent, std::vector<Stippler::line> &clipLines ) {
-	using std::floor;
-	using std::ceil;
+std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::iterator &cell, const Stippler::extents &extent ) {
+	using std::make_pair;
+	using std::numeric_limits;
+	using std::vector;
 
-	unsigned char *wp = bitmap;
+	float projection[9];
+	
+	vector<line> clipLines;
+
 	int x, y;
+
 	float xStep = ( extent.maxX - extent.minX ) / (float)tileWidth;
 	float yStep = ( extent.maxY - extent.minY ) / (float)tileHeight;
-	float fX;
-	float fY;
 
-	for ( y = 0, fY = extent.minY; y < tileHeight; y++, fY+=yStep ) {
-		for ( x = 0, fX = extent.minX; x < tileWidth; x++, fX+=xStep ) {
-			// something is outside of the polygon, if a point is outside of all clipping planes
-			bool outside = false;
-			for ( std::vector<Stippler::line>::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {
-				if ( x * iter->a + y * iter->b + iter->c >= 0 ) {
-					outside = true;
-					break;
-				}
-			}
+	float spotDensity, areaDensity = 0.0f, maxAreaDensity = 0.0f;
+	float xSum = 0.0f;
+	float ySum = 0.0f;
 
-			if (!outside) {
-				// blerp
-				unsigned char c = image.getDiscreteIntensity(floor(fX), floor(fY));
-
-				*wp = c;
-				*(wp + 1) = c;
-				*(wp + 2) = c;
-				*(wp + 3) = 255;
-			} else {
-				*(wp + 3) = 0;
-			}
-
-			wp+=4;
-		}
-	}
-}
-
-void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &extent ) {
-	float projection[9];
-	std::vector<line> clipLines;
+	float xCurrent;
+	float yCurrent;
 
 	createProjection(extent, projection);
-
+	
 	// compute the clip lines
 	for ( EdgeList::iterator value_iter = cell->second.begin(); value_iter != cell->second.end(); ++value_iter ) {
 		line l = createClipLine( projection, 
@@ -406,50 +380,25 @@ void Stippler::renderCell( EdgeMap::iterator &cell, const Stippler::extents &ext
 		clipLines.push_back(l);
 	}
 
-	fillTile(framebuffer, projection, extent, clipLines);
+	for ( y = 0, yCurrent = extent.minY; y < tileHeight; ++y, yCurrent += yStep ) {
+		for ( x = 0, xCurrent = extent.minX; x < tileWidth; ++x, xCurrent += xStep ) {
+			// something is outside of the polygon, if a point is outside of all clipping planes
+			bool outside = false;
+			for ( vector<line>::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {
+				if ( x * iter->a + y * iter->b + iter->c >= 0 ) {
+					outside = true;
+					break;
+				}
+			}
 
-#ifdef OUTPUT_TILE
-	std::vector<unsigned char> out;
-	std::stringstream fname;
-
-	fname << "tile" << cellNumber++ << ".png";
-	LodePNG::encode( out, framebuffer, tileWidth, tileHeight );
-	LodePNG::saveFile( out, fname.str() );
-#endif // OUTPUT_TILE
-}
-
-std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::iterator &cell, const Stippler::extents &extent ) {
-	using std::make_pair;
-	using std::numeric_limits;
-
-	unsigned char *fbPtr = framebuffer;
-	unsigned int x, y;
-
-	float xStep = ( extent.maxX - extent.minX ) / (float)tileWidth;
-	float yStep = ( extent.maxY - extent.minY ) / (float)tileHeight;
-
-	float spotDensity, areaDensity = 0.0f, maxAreaDensity = 0.0f;
-	float xSum = 0.0f;
-	float ySum = 0.0f;
-
-	float xCurrent;
-	float yCurrent;
-
-	yCurrent = extent.minY;
-	for ( y = 0; y < tileHeight; ++y, yCurrent+=yStep ) {
-		xCurrent = extent.minX;
-
-		for ( x = 0; x < tileWidth; ++x, xCurrent += xStep ) {
-			if ( *(fbPtr + 3) == 255 ) {
-				spotDensity = (float)(*fbPtr);
+			if (!outside) {
+				spotDensity = (float)image.getDiscreteIntensity(std::floor(xCurrent), std::floor(yCurrent));
 
 				areaDensity += spotDensity;
 				maxAreaDensity += 255.0f;
 				xSum += spotDensity * xCurrent;
 				ySum += spotDensity * yCurrent;
 			}
-
-			fbPtr+=4;
 		}
 	}
 

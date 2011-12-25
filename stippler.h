@@ -79,7 +79,6 @@ protected:
 
 	void redistributeStipples();
 
-	void renderCell( EdgeMap::iterator &cell, const extents &extent );
 	std::pair< Point<float>, float > calculateCellCentroid( EdgeMap::iterator &cell, const extents &extent );
 
 	// this is just for the front end
@@ -87,10 +86,7 @@ protected:
 protected:
 	void createProjection( const extents &extent, float *projection );
 	line createClipLine( const float projection[9], float insideX, float insideY, float Fx1, float Fy1, float Fx2, float Fy2 );
-	void fillTile( unsigned char *bitmap, const float projection[9], const extents &extent, std::vector<line> &clipLines );
 protected:
-	unsigned char *framebuffer;
-
 	EdgeMap edges;
 
 	GLuint dl_circle;
