@@ -142,21 +142,20 @@ void Stippler::createInitialDistribution() {
 	boost::mt19937 rng;
 	boost::uniform_01<boost::mt19937, float> generator( rng );
 
-	for ( unsigned int i = 0; i < parameters.points; ) {
-		float xC, yC;
+	float w = image.getWidth(), h = image.getHeight();
+	float xC, yC;
 
-		xC = generator() * (float)image.getWidth();
-		yC = generator() * (float)image.getHeight();
+	for ( unsigned int i = 0; i < parameters.points; ) {
+		xC = generator() * w;
+		yC = generator() * h;
 
 		// do a nearest neighbour search on the vertices
 		if ( generator() <= image.getIntensity( (unsigned int)xC, (unsigned int)yC ) ) {
-			//if ( image.getDiscreteIntensity( (unsigned int)xC, (unsigned int)yC ) > 25 ) {
-				vertsX[i] = xC;
-				vertsY[i] = yC;
-				radii[i] = 0.0f;
+			vertsX[i] = xC;
+			vertsY[i] = yC;
+			radii[i] = 0.0f;
 
-				i++;
-			//}
+			i++;
 		}
 	}
 }
@@ -320,7 +319,7 @@ inline Stippler::line Stippler::createClipLine( const float projection[9], float
 	l.b = x1 - x2;
 	l.c = (y1 - y2) * x1 - (x1 - x2) * y1;
 
-	// make sure the pixel falls on the correct side of the clipping plane
+	// make sure the known inside point falls on the correct side of the clipping plane
 	if ( insideX * l.a + insideY * l.b + l.c > 0 ) {
 		l.a *= -1;
 		l.b *= -1;
@@ -370,7 +369,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 
 	for ( y = 0, yCurrent = extent.minY; y < (int)tileHeight; ++y, yCurrent += yStep ) {
 		for ( x = 0, xCurrent = extent.minX; x < (int)tileWidth; ++x, xCurrent += xStep ) {
-			// something is outside of the polygon, if a point is outside of all clipping planes
+			// a point is outside of the polygon if it is outside of all clipping planes
 			bool outside = false;
 			for ( vector<line>::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {
 				if ( x * iter->a + y * iter->b + iter->c >= 0 ) {
