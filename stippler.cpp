@@ -71,7 +71,7 @@ void Stippler::createInitialDistribution() {
 		yC = generator() * h;
 
 		// do a nearest neighbour search on the vertices
-		if ( ceil(generator() * 255.0f) <= (float)image.getIntensity( (unsigned int)xC, (unsigned int)yC ) ) {
+		if ( ceil(generator() * 255.0f) <= image.getIntensity( xC, yC ) ) {
 			vertsX[i] = xC;
 			vertsY[i] = yC;
 			radii[i] = 0.0f;
@@ -101,7 +101,7 @@ void Stippler::render( std::string &output_path ) {
 	float radius;
 	for ( unsigned int i = 0; i < parameters.points; ++i ) {
 		if ( parameters.useColour ) {
-			image.getColour((unsigned int)std::ceil(vertsX[i]), (unsigned int)std::ceil(vertsY[i]), r, g, b);
+			image.getColour(vertsX[i], vertsY[i], r, g, b);
 		}
 
 		if ( parameters.fixedRadius ) {
@@ -252,7 +252,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 			}
 
 			if (!outside) {
-				spotDensity = (float)image.getIntensity((unsigned int)floor(xCurrent), (unsigned int)floor(yCurrent));
+				spotDensity = image.getIntensity(floor(xCurrent), floor(yCurrent));
 
 				areaDensity += spotDensity;
 				maxAreaDensity += 255.0f;

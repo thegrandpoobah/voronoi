@@ -50,11 +50,25 @@ unsigned char Bitmap::getIntensity( unsigned int x, unsigned int y ) {
 	return intensityMap[y * file->w + x];
 }
 
+float Bitmap::getIntensity( float x, float y ) {
+	// for now, use nearest neighbour
+	using std::floor;
+
+	return (float)getIntensity(floor(x), floor(y));
+}
+
 void Bitmap::getColour( unsigned int x, unsigned int y, unsigned char &r, unsigned char &g, unsigned char &b ) {
 	unsigned char *dataPtr = file->data + ( (y * file->w + x) * 4 );
 	r = *(dataPtr);
 	g = *(dataPtr+1);
 	b = *(dataPtr+2);
+}
+
+void Bitmap::getColour( float x, float y, unsigned char &r, unsigned char &g, unsigned char &b ) {
+	// for now, use nearest neighbour
+	using std::floor;
+
+	return getColour( floor(x), floor(y), r, g, b );
 }
 
 unsigned int Bitmap::getWidth() {

@@ -39,8 +39,10 @@ public:
 	~Bitmap();
 
 	unsigned char getIntensity( unsigned int x, unsigned int y );
+	float getIntensity( float x, float y );
 
 	void getColour( unsigned int x, unsigned int y, unsigned char &r, unsigned char &g, unsigned char &b );
+	void getColour( float x, float y, unsigned char &r, unsigned char &g, unsigned char &b );
 
 	unsigned int getWidth();
 	unsigned int getHeight();
