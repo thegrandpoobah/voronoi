@@ -46,29 +46,46 @@ Bitmap::~Bitmap() {
 	delete[] intensityMap;
 }
 
-unsigned char Bitmap::getIntensity( unsigned int x, unsigned int y ) {
-	return intensityMap[y * file->w + x];
-}
-
 float Bitmap::getIntensity( float x, float y ) {
-	// for now, use nearest neighbour
 	using std::floor;
 
-	return (float)getIntensity(floor(x), floor(y));
-}
-
-void Bitmap::getColour( unsigned int x, unsigned int y, unsigned char &r, unsigned char &g, unsigned char &b ) {
-	unsigned char *dataPtr = file->data + ( (y * file->w + x) * 4 );
-	r = *(dataPtr);
-	g = *(dataPtr+1);
-	b = *(dataPtr+2);
+	// from wikipedia 
+	unsigned char *iMPtr = intensityMap + (unsigned int)floor(y) * file->w + (unsigned int)floor(x);
+	float fX = x - floor(x), fY = y - floor(y);
+	
+	return 
+		(float)(*(iMPtr)) * (1 - fX) * (1 - fY) + 
+		(float)(*(iMPtr + 1)) * fX * (1 - fY) +
+		(float)(*(iMPtr + file->w)) * (1 - fX) * fY +
+		(float)(*(iMPtr + file->w + 1)) * fX * fY;
 }
 
 void Bitmap::getColour( float x, float y, unsigned char &r, unsigned char &g, unsigned char &b ) {
-	// for now, use nearest neighbour
 	using std::floor;
 
-	return getColour( floor(x), floor(y), r, g, b );
+	float fX = x - floor(x), fY = y - floor(y);
+	float f00 = (1 - fX) * (1 - fY),
+		f10 = fX * (1 - fY),
+		f01 = (1 - fX) * fY,
+		f11 = fX * fY;
+
+	unsigned char *dataPtr = file->data + (((unsigned int)floor(y) * file->w + (unsigned int)floor(x)) * 4);
+	r = floor((float)(*(dataPtr)) * f00 + 
+		(float)(*(dataPtr + 4)) * f10 +
+		(float)(*(dataPtr + file->w * 4)) * f01 +
+		(float)(*(dataPtr + file->w * 4 + 4)) * f11);
+
+	dataPtr++;
+	g = floor((float)(*(dataPtr)) * f00 + 
+		(float)(*(dataPtr + 4)) * f10 +
+		(float)(*(dataPtr + file->w * 4)) * f01 +
+		(float)(*(dataPtr + file->w * 4 + 4)) * f11);
+
+	dataPtr++;
+	b = floor((float)(*(dataPtr)) * f00 + 
+		(float)(*(dataPtr + 4)) * f10 +
+		(float)(*(dataPtr + file->w * 4)) * f01 +
+		(float)(*(dataPtr + file->w * 4 + 4)) * f11);
 }
 
 unsigned int Bitmap::getWidth() {
