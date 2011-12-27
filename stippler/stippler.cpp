@@ -153,24 +153,29 @@ void Stippler::createVoronoiDiagram() {
 void Stippler::redistributeStipples() {
 	unsigned int j = 0;
 	displacement = 0.0f;
-	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
-		extents extent = getCellExtents( key_iter );
+	
+	#pragma omp parallel
+	{
+		for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
+			#pragma omp single nowait
+			{
+				std::pair< Point<float>, float > centroid = calculateCellCentroid( key_iter, getCellExtents( key_iter ) );
 
-		std::pair< Point<float>, float > centroid = calculateCellCentroid( key_iter, extent );
+				float rad = centroid.second;
+				if ( !_isnan( rad ) ) {
+					radii[j] = rad;
+				} else {
+					radii[j] = 0.0f;
+				}
+				if ( !_isnan( centroid.first.x ) && !_isnan( centroid.first.y ) ) {
+					displacement += ::sqrt( ::pow( key_iter->first.x - centroid.first.x, 2.0f ) + ::pow( key_iter->first.y - centroid.first.y, 2.0f ) );
+					vertsX[j] = centroid.first.x;
+					vertsY[j] = centroid.first.y;
+				}
 
-		float rad = centroid.second;
-		if ( !_isnan( rad ) ) {
-			radii[j] = rad;
-		} else {
-			radii[j] = 0.0f;
+				j++;
+			}
 		}
-		if ( !_isnan( centroid.first.x ) && !_isnan( centroid.first.y ) ) {
-			displacement += ::sqrt( ::pow( key_iter->first.x - centroid.first.x, 2.0f ) + ::pow( key_iter->first.y - centroid.first.y, 2.0f ) );
-			vertsX[j] = centroid.first.x;
-			vertsY[j] = centroid.first.y;
-		}
-
-		j++;
 	}
 
 	displacement /= j; // average out the displacement
@@ -184,7 +189,7 @@ inline Stippler::line Stippler::createClipLine( float FinsideX, float FinsideY, 
 
 	// if the floating point version of the line collapsed down to one
 	// point, then just ignore it all
-	if (abs(Fx1 - Fx2) < std::numeric_limits<float>::epsilon() && abs(Fy1 - Fy2) < std::numeric_limits<float>::epsilon()) {
+	if (abs(Fx1 - Fx2) < numeric_limits<float>::epsilon() && abs(Fy1 - Fy2) < numeric_limits<float>::epsilon()) {
 		l.a = .0f;
 		l.b = .0f;
 		l.c = .0f;
