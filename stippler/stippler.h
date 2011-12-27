@@ -25,67 +25,51 @@ THE SOFTWARE.
 #define STIPPLER_H
 
 #ifdef WIN32
-#define NOMINMAX
-#include <windows.h>
-#endif // WIN32
+#ifdef STIPPLER_LIBRARY
+#define STIPPLER_METHOD __declspec(dllexport)
+#else
+#define STIPPLER_METHOD __declspec(dllimport)
+#endif
+#else
+#define STIPPLER_METHOD
+#endif
 
-#include <string>
-#include <vector>
+#ifdef __cplusplus
+extern "C" {
+#endif 
 
-#include <boost/unordered_map.hpp>
+typedef void * STIPPLER_HANDLE;
 
-#include "istippler.h"
-#include "stipplingparameters.h"
-#include "utility.h"
-#include "bitmap.h"
-
-class Stippler : public IStippler {
-protected:
-	typedef std::vector< Edge< float > > EdgeList;
-	typedef boost::unordered_map< Point < float >, EdgeList > EdgeMap;
-
-	struct extents {
-		float minX;
-		float minY;
-		float maxX;
-		float maxY;
-	};
-
-	struct line {
-		float a;
-		float b;
-		float c;
-	};
-public:
-	Stippler( const StipplingParameters &parameters );
-	~Stippler();
-
-	void distribute();
-	float getAverageDisplacement();
-	void getStipples( StipplePoint *dst );
-protected:
-	void createInitialDistribution();
-	void createVoronoiDiagram();
-
-	extents getCellExtents( EdgeList &edgeList );
-
-	void redistributeStipples();
-
-	std::pair< Point<float>, float > calculateCellCentroid( Point<float> &inside, EdgeList &edgeList );
-	line createClipLine( float insideX, float insideY, float x1, float y1, float x2, float y2 );
-protected:
-	EdgeMap edges;
-
-	float *vertsX, *vertsY;
-	float *radii;
-	float displacement;
-
-	Bitmap image;
-
-	const StipplingParameters &parameters;
+struct StipplingParameters {
+	const char *inputFile;
+	unsigned int points;
+	float threshold;
+	bool createLogs;
+	bool useColour;
+	bool noOverlap;
+	bool fixedRadius;
+	float sizingFactor;
+	unsigned int subpixels;
 };
 
-bool operator==(Point<float> const& p1, Point<float> const& p2);
-std::size_t hash_value(Point<float> const& p);
+struct StipplePoint {
+	float x;
+	float y;
+	float radius;
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+};
+
+STIPPLER_METHOD STIPPLER_HANDLE create_stippler( StipplingParameters *parameters );
+STIPPLER_METHOD void destroy_stippler( STIPPLER_HANDLE handle );
+
+STIPPLER_METHOD void stippler_distribute( STIPPLER_HANDLE handle );
+STIPPLER_METHOD float stippler_getAverageDisplacement( STIPPLER_HANDLE handle );
+STIPPLER_METHOD void stippler_getStipples( STIPPLER_HANDLE handle, StipplePoint *dst );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // STIPPLER_H

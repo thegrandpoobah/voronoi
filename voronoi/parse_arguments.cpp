@@ -48,7 +48,7 @@ void showSamples() {
 	cout << endl;
 }
 
-std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] ) {
+std::auto_ptr<Voronoi::StipplingParameters> parseArguments( int argc, char *argv[] ) {
 	using namespace boost::program_options;
 
 	using std::auto_ptr;
@@ -102,16 +102,16 @@ std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] ) {
 			cout << basicOpts << endl;
 			cout << advancedOpts << endl;
 
-			return auto_ptr<StipplingParameters>( NULL );
+			return auto_ptr<Voronoi::StipplingParameters>( NULL );
 		}
 
 		variables_map vm;
 		store( command_line_parser( argc, argv ).options( all ).positional( positional ).run(), vm );
 		notify( vm );
 
-		auto_ptr<StipplingParameters> params( new StipplingParameters() );
+		auto_ptr<Voronoi::StipplingParameters> params( new Voronoi::StipplingParameters() );
 
-		params->inputFile = vm["input-file"].as<string>();
+		params->inputFile = vm["input-file"].as<string>().c_str();
 		params->outputFile = vm["output-file"].as<string>();
 
 		params->points = vm["stipples"].as<unsigned int>();

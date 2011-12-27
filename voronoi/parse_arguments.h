@@ -26,8 +26,14 @@ THE SOFTWARE.
 
 #include <memory>
 
-#include <stipplingparameters.h>
+#include <stippler.h>
 
-std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] );
+namespace Voronoi {
+	struct StipplingParameters : ::StipplingParameters {
+		std::string outputFile;
+	};
+}
+
+std::auto_ptr<Voronoi::StipplingParameters> parseArguments( int argc, char *argv[] );
 
 #endif // PARSE_ARGUMENTS_H

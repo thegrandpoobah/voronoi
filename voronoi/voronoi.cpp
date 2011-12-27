@@ -38,9 +38,11 @@ THE SOFTWARE.
 // boost
 #include <boost/timer.hpp>
 
+// PNG library
+#include <picopng.h>
+
 // stippler library
 #include <istippler.h>
-#include <bitmap.h> // TODO: This doesn't really belong here
 
 // local
 #include "parse_arguments.h"
@@ -83,10 +85,10 @@ void write_configuration( std::ostream &output, const StipplingParameters &param
 	output << endl;
 }
 
-void render( IStippler *stippler, const StipplingParameters &parameters ) {
+void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &parameters ) {
 	StipplePoint *points = new StipplePoint[parameters.points];
 
-	stippler->getStipples(points);
+	stippler_getStipples(stippler, points);
 
 	using namespace std;
 
@@ -98,11 +100,13 @@ void render( IStippler *stippler, const StipplingParameters &parameters ) {
 		throw exception(s.str().c_str());
 	}
 
-	Bitmap image(parameters.inputFile);
+	PNG::PNGFile *png = PNG::load( parameters.inputFile );
+	unsigned long w = png->w, h = png->h;
+	PNG::freePng(png);
 
 	outputStream << "<?xml version=\"1.0\" ?>" << endl;
 	outputStream << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" << endl;
-	outputStream << "<svg width=\"" << image.getWidth() << "\" height=\"" << image.getHeight() << "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" << endl;
+	outputStream << "<svg width=\"" << w << "\" height=\"" << h << "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" << endl;
 	
 	float radius;
 	for ( unsigned int i = 0; i < parameters.points; ++i ) {
@@ -138,7 +142,7 @@ int main( int argc, char *argv[] ) {
 	using std::min;
 	using boost::timer;
 
-	auto_ptr<StipplingParameters> parameters;
+	auto_ptr<Voronoi::StipplingParameters> parameters;
 	
 	try {
 		parameters = parseArguments( argc, argv );
@@ -149,7 +153,7 @@ int main( int argc, char *argv[] ) {
 		return -1;
 	}
 
-	auto_ptr<IStippler> stippler;
+	STIPPLER_HANDLE stippler;
 
 	ofstream log;
 	if ( parameters->createLogs ) {
@@ -157,7 +161,7 @@ int main( int argc, char *argv[] ) {
 	}
 
 	try {
-		stippler = make_stippler( *( parameters.get() ) );
+		stippler = create_stippler( parameters.get() );
 	} catch ( exception e ) {
 		cerr << e.what() << endl;
 
@@ -174,14 +178,14 @@ int main( int argc, char *argv[] ) {
 	do {
 		timer profiler;
 
-		stippler->distribute();
+		stippler_distribute(stippler);
 
 		if ( parameters->createLogs ) {
 			log << "Iteration " << (++iteration) << " completed in " << profiler.elapsed() << " seconds." << endl;
 			cout << "Iteration " << iteration << " completed in " << profiler.elapsed() << " seconds." << endl;
 		}
 
-		t = stippler->getAverageDisplacement();
+		t = stippler_getAverageDisplacement( stippler );
 
 		if ( parameters->createLogs ) {
 			log << "Current Displacement: " << t << endl;
@@ -193,7 +197,7 @@ int main( int argc, char *argv[] ) {
 
 	// render final result to SVG
 	try {
-		render( stippler.get(), *(parameters.get()) );
+		render( stippler, *(parameters.get()) );
 	} catch (exception e) {
 		cerr << e.what();
 	}
@@ -201,6 +205,8 @@ int main( int argc, char *argv[] ) {
 	if ( parameters->createLogs ) {
 		log.close();
 	}
+
+	destroy_stippler( stippler );
 
 	return 0;
 }

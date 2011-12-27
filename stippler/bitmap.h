@@ -31,7 +31,7 @@ THE SOFTWARE.
 
 #include <string>
 
-#include "picopng.h"
+#include <picopng.h>
 
 class Bitmap {
 public:

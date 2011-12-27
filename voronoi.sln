@@ -4,15 +4,21 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voronoi", "voronoi\voronoi.vcxproj", "{5826684A-8BAF-4C55-87F4-ED785E2578DF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE} = {4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}
+		{91FF2A5E-DF6C-43A2-900C-DBB36628733D} = {91FF2A5E-DF6C-43A2-900C-DBB36628733D}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stippler", "stippler\stippler.vcxproj", "{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{91FF2A5E-DF6C-43A2-900C-DBB36628733D} = {91FF2A5E-DF6C-43A2-900C-DBB36628733D}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "errata", "errata", "{4980AD59-F564-46F5-B659-2CFE3AEDA848}"
 	ProjectSection(SolutionItems) = preProject
 		voronoi\license.txt = voronoi\license.txt
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "picopng", "picopng\picopng.vcxproj", "{91FF2A5E-DF6C-43A2-900C-DBB36628733D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +34,10 @@ Global
 		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Debug|Win32.Build.0 = Debug|Win32
 		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Release|Win32.ActiveCfg = Release|Win32
 		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Release|Win32.Build.0 = Release|Win32
+		{91FF2A5E-DF6C-43A2-900C-DBB36628733D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{91FF2A5E-DF6C-43A2-900C-DBB36628733D}.Debug|Win32.Build.0 = Debug|Win32
+		{91FF2A5E-DF6C-43A2-900C-DBB36628733D}.Release|Win32.ActiveCfg = Release|Win32
+		{91FF2A5E-DF6C-43A2-900C-DBB36628733D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

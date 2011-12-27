@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "stippler.h"
+#include "stippler_impl.h"
 
 #include <fstream>
 #include <limits>
@@ -148,7 +148,7 @@ void Stippler::redistributeStipples() {
 	displacement = 0.0f;
 
 	#pragma omp for private(distance)
-	for (int i = 0; i < vectorized.size(); i++) {
+	for (int i = 0; i < (int)vectorized.size(); i++) {
 		pair< Point< float >, EdgeList > item = vectorized[i];
 		pair< Point<float>, float > centroid = calculateCellCentroid( item.first, item.second );
 
@@ -348,8 +348,3 @@ std::size_t hash_value(Point<float> const& p) {
     return seed;
 }
 
-std::auto_ptr<IStippler> make_stippler( const StipplingParameters &parameters ) {
-	using std::auto_ptr;
-
-	return auto_ptr<IStippler>( new Stippler( parameters ) );
-}

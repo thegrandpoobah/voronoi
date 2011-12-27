@@ -21,22 +21,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef STIPPLING_PARAMETERS_H
-#define STIPPLING_PARAMETERS_H
+#include "istippler.h"
+#include "stippler.h"
+#include "stippler_impl.h"
 
-#include <string>
+STIPPLER_HANDLE create_stippler( StipplingParameters *parameters ) {
+	return reinterpret_cast<STIPPLER_HANDLE>( new Stippler( *parameters ) );
+}
 
-struct StipplingParameters {
-	std::string inputFile;
-	std::string outputFile;
-	unsigned int points;
-	float threshold;
-	bool createLogs;
-	bool useColour;
-	bool noOverlap;
-	bool fixedRadius;
-	float sizingFactor;
-	unsigned int subpixels;
-};
+void destroy_stippler( STIPPLER_HANDLE handle ) {
+	delete reinterpret_cast<IStippler *>(handle);
+}
 
-#endif // STIPPLING_PARAMETERS_H
+void stippler_distribute( STIPPLER_HANDLE handle ) {
+	(reinterpret_cast<IStippler *>(handle))->distribute();
+}
+
+float stippler_getAverageDisplacement( STIPPLER_HANDLE handle ) {
+	return (reinterpret_cast<IStippler *>(handle))->getAverageDisplacement();
+}
+
+void stippler_getStipples( STIPPLER_HANDLE handle, StipplePoint *dst ) {
+	return (reinterpret_cast<IStippler *>(handle))->getStipples(dst);
+}
