@@ -1,7 +1,6 @@
 syntax: glob
 Debug/*
 Release/*
-*PGO/*
 ipch/*
 handin/*
 *.bak

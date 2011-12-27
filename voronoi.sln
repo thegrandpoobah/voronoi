@@ -18,25 +18,15 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
-		PGOInstrument|Win32 = PGOInstrument|Win32
-		PGOOptimize|Win32 = PGOOptimize|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.Debug|Win32.ActiveCfg = Debug|Win32
 		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.Debug|Win32.Build.0 = Debug|Win32
-		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.PGOInstrument|Win32.ActiveCfg = PGOInstrument|Win32
-		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.PGOInstrument|Win32.Build.0 = PGOInstrument|Win32
-		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.PGOOptimize|Win32.ActiveCfg = PGOOptimize|Win32
-		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.PGOOptimize|Win32.Build.0 = PGOOptimize|Win32
 		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.Release|Win32.ActiveCfg = Release|Win32
 		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.Release|Win32.Build.0 = Release|Win32
 		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Debug|Win32.ActiveCfg = Debug|Win32
 		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Debug|Win32.Build.0 = Debug|Win32
-		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.PGOInstrument|Win32.ActiveCfg = PGOInstrument|Win32
-		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.PGOInstrument|Win32.Build.0 = PGOInstrument|Win32
-		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.PGOOptimize|Win32.ActiveCfg = PGOOptimize|Win32
-		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.PGOOptimize|Win32.Build.0 = PGOOptimize|Win32
 		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Release|Win32.ActiveCfg = Release|Win32
 		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection

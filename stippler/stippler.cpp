@@ -90,7 +90,7 @@ void Stippler::render( std::string &output_path ) {
 
 	if ( !outputStream.is_open() ) {
 		stringstream s;
-		s<< "Unable to open output file " << output_path;
+		s << "Unable to open output file " << output_path;
 		throw exception(s.str().c_str());
 	}
 
@@ -113,7 +113,6 @@ void Stippler::render( std::string &output_path ) {
 
 		outputStream << "<circle cx=\"" << vertsX[i] << "\" cy=\"" << vertsY[i] << "\" r=\"" << radius << "\" fill=\"rgb(" << (int)r << "," << (int)g << "," << (int)b << ")\" />" << endl;
 	}
-//stroke=\"black\" stroke-width=\"1\" 
 	outputStream << "</svg>" << endl;
 
 	outputStream.close();
