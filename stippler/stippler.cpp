@@ -151,6 +151,9 @@ void Stippler::createVoronoiDiagram() {
 }
 
 void Stippler::redistributeStipples() {
+	using std::pow;
+	using std::sqrt;
+
 	unsigned int j = 0;
 	displacement = 0.0f;
 	
@@ -161,17 +164,11 @@ void Stippler::redistributeStipples() {
 			{
 				std::pair< Point<float>, float > centroid = calculateCellCentroid( key_iter, getCellExtents( key_iter ) );
 
-				float rad = centroid.second;
-				if ( !_isnan( rad ) ) {
-					radii[j] = rad;
-				} else {
-					radii[j] = 0.0f;
-				}
-				if ( !_isnan( centroid.first.x ) && !_isnan( centroid.first.y ) ) {
-					displacement += ::sqrt( ::pow( key_iter->first.x - centroid.first.x, 2.0f ) + ::pow( key_iter->first.y - centroid.first.y, 2.0f ) );
-					vertsX[j] = centroid.first.x;
-					vertsY[j] = centroid.first.y;
-				}
+				radii[j] = centroid.second;
+
+				displacement += sqrt( pow( key_iter->first.x - centroid.first.x, 2.0f ) + pow( key_iter->first.y - centroid.first.y, 2.0f ) );
+				vertsX[j] = centroid.first.x;
+				vertsY[j] = centroid.first.y;
 
 				j++;
 			}
