@@ -89,13 +89,7 @@ void Stippler::getStipples( StipplePoint *dst ) {
 		workingPtr->y = vertsY[i];
 		workingPtr->radius = radii[i];
 
-		if (parameters.useColour) {
-			image.getColour(vertsX[i], vertsY[i], workingPtr->r, workingPtr->g, workingPtr->b); 
-		} else {
-			workingPtr->r = 0;
-			workingPtr->g = 0;
-			workingPtr->b = 0;
-		}
+		image.getColour(vertsX[i], vertsY[i], workingPtr->r, workingPtr->g, workingPtr->b); 
 	}
 }
 

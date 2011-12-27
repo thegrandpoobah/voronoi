@@ -47,7 +47,7 @@ THE SOFTWARE.
 // local
 #include "parse_arguments.h"
 
-void write_configuration( std::ostream &output, const StipplingParameters &parameters ) {
+void write_configuration( std::ostream &output, const Voronoi::StipplingParameters &parameters ) {
 	using std::endl;
 	using std::abs;
 	using std::numeric_limits;
@@ -116,6 +116,10 @@ void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &param
 			radius = points[i].radius;
 		}
 		radius *= parameters.sizingFactor;
+
+		if ( !parameters.useColour ) {
+			points[i].r = points[i].g = points[i].b = 0;
+		}
 
 		outputStream << "<circle cx=\"" << points[i].x << "\" cy=\"" << points[i].y << "\" r=\"" << radius << "\" fill=\"rgb(" << (unsigned int)points[i].r << "," << (unsigned int)points[i].g << "," << (unsigned int)points[i].b << ")\" />" << endl;
 	}

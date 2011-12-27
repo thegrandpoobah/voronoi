@@ -43,11 +43,7 @@ typedef void * STIPPLER_HANDLE;
 struct StipplingParameters {
 	const char *inputFile;
 	unsigned int points;
-	float threshold;
-	bool useColour;
 	bool noOverlap;
-	bool fixedRadius;
-	float sizingFactor;
 	unsigned int subpixels;
 };
 

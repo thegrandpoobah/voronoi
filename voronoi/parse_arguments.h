@@ -32,6 +32,10 @@ namespace Voronoi {
 	struct StipplingParameters : ::StipplingParameters {
 		std::string outputFile;
 		bool createLogs;
+		float threshold;
+		bool useColour;
+		bool fixedRadius;
+		float sizingFactor;
 	};
 }
 
