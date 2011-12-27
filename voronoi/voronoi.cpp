@@ -126,9 +126,6 @@ void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &param
 	outputStream << "</svg>" << endl;
 
 	outputStream.close();
-	for (unsigned int i = 0; i < parameters.points; i++) {
-		
-	}
 
 	delete[] points;
 }
