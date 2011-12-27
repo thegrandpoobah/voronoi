@@ -77,6 +77,7 @@ std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] ) {
 		( "no-overlap,n", "Ensure that stipple points do not overlap with each other" )
 		( "fixed-radius,f", "Fixed radius stipple points imply a significant loss of tonal properties" )
 		( "sizing-factor,z", value< float >()->default_value(1.0f, "1.0"), "The final stipple radius is multiplied by this factor" )
+		( "subpixels,p", value< unsigned int >()->default_value(5, "5"), "Controls the tile size of centroid computations." )
 		( "log,l", "Determines output verbosity" );
 
 	positional_options_description positional;
@@ -120,6 +121,7 @@ std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] ) {
 		params->noOverlap = vm.count("no-overlap") > 0;
 		params->fixedRadius = vm.count("fixed-radius") > 0;
 		params->sizingFactor = vm["sizing-factor"].as<float>();
+		params->subpixels = vm["subpixels"].as<unsigned int>();
 
 		return params;
 	} catch ( exception e ) {

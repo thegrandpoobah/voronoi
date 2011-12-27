@@ -82,8 +82,6 @@ protected:
 
 	Bitmap image;
 
-	unsigned int tileWidth, tileHeight;
-
 	const StipplingParameters &parameters;
 };
 

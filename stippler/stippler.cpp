@@ -34,7 +34,6 @@ THE SOFTWARE.
 Stippler::Stippler( const StipplingParameters &parameters )
 : IStippler(),
 parameters(parameters),
-tileWidth(128), tileHeight(128),
 displacement(std::numeric_limits<float>::max()),
 vertsX(new float[parameters.points]), vertsY(new float[parameters.points]), radii(new float[parameters.points]),
 image(parameters.inputFile) {
@@ -232,8 +231,8 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( Point<float> &
 	float xDiff = ( extent.maxX - extent.minX );
 	float yDiff = ( extent.maxY - extent.minY );
 
-	/*unsigned int tileWidth = (unsigned int)ceil(xDiff) * 5;
-	unsigned int tileHeight = (unsigned int)ceil(yDiff) * 5;*/
+	unsigned int tileWidth = (unsigned int)ceil(xDiff) * parameters.subpixels;
+	unsigned int tileHeight = (unsigned int)ceil(yDiff) * parameters.subpixels;
 
 	float xStep = xDiff / (float)tileWidth;
 	float yStep = yDiff / (float)tileHeight;

@@ -68,6 +68,8 @@ void write_configuration( std::ostream &output, const StipplingParameters &param
 		output << ", Variable radius";
 	}
 
+	output << ", Subpixel density of " << parameters.subpixels;
+
 	if ( abs( parameters.sizingFactor - 1.0f ) > numeric_limits<float>::epsilon() ) {
 		output << ", Sizing factor of " << parameters.sizingFactor;
 	}

@@ -36,6 +36,7 @@ struct StipplingParameters {
 	bool noOverlap;
 	bool fixedRadius;
 	float sizingFactor;
+	unsigned int subpixels;
 };
 
 #endif // STIPPLING_PARAMETERS_H
