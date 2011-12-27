@@ -67,12 +67,12 @@ protected:
 	void createInitialDistribution();
 	void createVoronoiDiagram();
 
-	extents getCellExtents( EdgeMap::iterator &cell );
+	extents getCellExtents( EdgeList &edgeList );
 
 	void redistributeStipples();
 
-	std::pair< Point<float>, float > calculateCellCentroid( EdgeMap::iterator &cell, const extents &extent );
-	line createClipLine( float insideX, float insideY, float Fx1, float Fy1, float Fx2, float Fy2 );
+	std::pair< Point<float>, float > calculateCellCentroid( Point<float> &inside, EdgeList &edgeList );
+	line createClipLine( float insideX, float insideY, float x1, float y1, float x2, float y2 );
 protected:
 	EdgeMap edges;
 

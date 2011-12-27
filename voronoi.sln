@@ -11,7 +11,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "errata", "errata", "{4980AD59-F564-46F5-B659-2CFE3AEDA848}"
 	ProjectSection(SolutionItems) = preProject
 		voronoi\license.txt = voronoi\license.txt
-		pgo.bat = pgo.bat
 		README.md = README.md
 	EndProjectSection
 EndProject

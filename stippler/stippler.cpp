@@ -152,32 +152,39 @@ void Stippler::createVoronoiDiagram() {
 void Stippler::redistributeStipples() {
 	using std::pow;
 	using std::sqrt;
+	using std::pair;
+	using std::make_pair;
+	using std::vector;
 
 	unsigned int j = 0;
-	displacement = 0.0f;
-	
-	#pragma omp parallel
-	{
-		for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
-			#pragma omp single nowait
-			{
-				std::pair< Point<float>, float > centroid = calculateCellCentroid( key_iter, getCellExtents( key_iter ) );
+	float distance;
 
-				radii[j] = centroid.second;
-
-				displacement += sqrt( pow( key_iter->first.x - centroid.first.x, 2.0f ) + pow( key_iter->first.y - centroid.first.y, 2.0f ) );
-				vertsX[j] = centroid.first.x;
-				vertsY[j] = centroid.first.y;
-
-				j++;
-			}
-		}
+	vector< pair< Point< float >, EdgeList > > vectorized;
+	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
+		vectorized.push_back(make_pair(key_iter->first, key_iter->second));
 	}
 
-	displacement /= j; // average out the displacement
+	displacement = 0.0f;
+
+	#pragma omp for private(distance)
+	for (int i = 0; i < vectorized.size(); i++) {
+		pair< Point< float >, EdgeList > item = vectorized[i];
+		pair< Point<float>, float > centroid = calculateCellCentroid( item.first, item.second );
+
+		distance = sqrt( pow( item.first.x - centroid.first.x, 2.0f ) + pow( item.first.y - centroid.first.y, 2.0f ) );
+
+		radii[i] = centroid.second;
+		vertsX[i] = centroid.first.x;
+		vertsY[i] = centroid.first.y;
+
+		#pragma omp atomic
+		displacement += distance;
+	}
+
+	displacement /= vectorized.size(); // average out the displacement
 }
 
-inline Stippler::line Stippler::createClipLine( float FinsideX, float FinsideY, float Fx1, float Fy1, float Fx2, float Fy2 ) {
+inline Stippler::line Stippler::createClipLine( float insideX, float insideY, float x1, float y1, float x2, float y2 ) {
 	using std::abs;
 	using std::numeric_limits;
 
@@ -185,7 +192,7 @@ inline Stippler::line Stippler::createClipLine( float FinsideX, float FinsideY, 
 
 	// if the floating point version of the line collapsed down to one
 	// point, then just ignore it all
-	if (abs(Fx1 - Fx2) < numeric_limits<float>::epsilon() && abs(Fy1 - Fy2) < numeric_limits<float>::epsilon()) {
+	if (abs(x1 - x2) < numeric_limits<float>::epsilon() && abs(y1 - y2) < numeric_limits<float>::epsilon()) {
 		l.a = .0f;
 		l.b = .0f;
 		l.c = .0f;
@@ -193,12 +200,12 @@ inline Stippler::line Stippler::createClipLine( float FinsideX, float FinsideY, 
 		return l;
 	}
 
-	l.a = -(Fy1 - Fy2);
-	l.b = Fx1 - Fx2;
-	l.c = (Fy1 - Fy2) * Fx1 - (Fx1 - Fx2) * Fy1;
+	l.a = -(y1 - y2);
+	l.b = x1 - x2;
+	l.c = (y1 - y2) * x1 - (x1 - x2) * y1;
 
 	// make sure the known inside point falls on the correct side of the clipping plane
-	if ( FinsideX * l.a + FinsideY * l.b + l.c > 0 ) {
+	if ( insideX * l.a + insideY * l.b + l.c > 0.0f ) {
 		l.a *= -1;
 		l.b *= -1;
 		l.c *= -1;
@@ -207,19 +214,29 @@ inline Stippler::line Stippler::createClipLine( float FinsideX, float FinsideY, 
 	return l;
 }
 
-std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::iterator &cell, const Stippler::extents &extent ) {
+std::pair< Point<float>, float > Stippler::calculateCellCentroid( Point<float> &inside, EdgeList &edgeList ) {
 	using std::make_pair;
 	using std::numeric_limits;
 	using std::vector;
 	using std::floor;
+	using std::ceil;
 	using std::abs;
+	using std::sqrt;
+	using std::pow;
 
 	vector<line> clipLines;
+	extents extent = getCellExtents(edgeList);
 
 	int x, y;
 
-	float xStep = ( extent.maxX - extent.minX ) / (float)tileWidth;
-	float yStep = ( extent.maxY - extent.minY ) / (float)tileHeight;
+	float xDiff = ( extent.maxX - extent.minX );
+	float yDiff = ( extent.maxY - extent.minY );
+
+	/*unsigned int tileWidth = (unsigned int)ceil(xDiff) * 5;
+	unsigned int tileHeight = (unsigned int)ceil(yDiff) * 5;*/
+
+	float xStep = xDiff / (float)tileWidth;
+	float yStep = yDiff / (float)tileHeight;
 
 	float spotDensity, areaDensity = 0.0f, maxAreaDensity = 0.0f;
 	float xSum = 0.0f;
@@ -229,8 +246,8 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	float yCurrent;
 
 	// compute the clip lines
-	for ( EdgeList::iterator value_iter = cell->second.begin(); value_iter != cell->second.end(); ++value_iter ) {
-		line l = createClipLine( cell->first.x, cell->first.y, 
+	for ( EdgeList::iterator value_iter = edgeList.begin(); value_iter != edgeList.end(); ++value_iter ) {
+		line l = createClipLine( inside.x, inside.y, 
 			value_iter->begin.x, value_iter->begin.y,
 			value_iter->end.x, value_iter->end.y );
 	
@@ -246,14 +263,14 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 			// a point is outside of the polygon if it is outside of all clipping planes
 			bool outside = false;
 			for ( vector<line>::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {
-				if ( xCurrent * iter->a + yCurrent * iter->b + iter->c >= 0 ) {
+				if ( xCurrent * iter->a + yCurrent * iter->b + iter->c >= 0.0f ) {
 					outside = true;
 					break;
 				}
 			}
 
 			if (!outside) {
-				spotDensity = image.getIntensity(floor(xCurrent), floor(yCurrent));
+				spotDensity = image.getIntensity(xCurrent, yCurrent);
 
 				areaDensity += spotDensity;
 				maxAreaDensity += 255.0f;
@@ -267,8 +284,14 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	float maxArea = maxAreaDensity * xStep * yStep / 255.0f;
 
 	Point<float> pt;
-	pt.x = xSum / areaDensity;
-	pt.y = ySum / areaDensity;
+	if (areaDensity > numeric_limits<float>::epsilon()) {
+		pt.x = xSum / areaDensity;
+		pt.y = ySum / areaDensity;
+	} else {
+		// if for some reason, the cell is completely white, then the centroid does not move
+		pt.x = inside.x;
+		pt.y = inside.y;
+	}
 
 	float closest = numeric_limits<float>::max(),
 		  farthest = numeric_limits<float>::min(),
@@ -276,11 +299,11 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	float x0 = pt.x, y0 = pt.y,
 	      x1, x2, y1, y2;
 
-	for ( EdgeList::iterator value_iter = cell->second.begin(); value_iter != cell->second.end(); ++value_iter ) {
+	for ( EdgeList::iterator value_iter = edgeList.begin(); value_iter != edgeList.end(); ++value_iter ) {
 		x1 = value_iter->begin.x; x2 = value_iter->end.x;
 		y1 = value_iter->begin.y; y2 = value_iter->end.y;
 
-		distance = ::abs( ( x2 - x1 ) * ( y1 - y0 ) - ( x1 - x0 ) * ( y2 - y1 ) ) / ::sqrt( ::pow( x2 - x1, 2.0f ) + ::pow( y2 - y1, 2.0f ) );
+		distance = abs( ( x2 - x1 ) * ( y1 - y0 ) - ( x1 - x0 ) * ( y2 - y1 ) ) / sqrt( pow( x2 - x1, 2.0f ) + pow( y2 - y1, 2.0f ) );
 		if ( closest > distance ) {
 			closest = distance;
 		}
@@ -300,7 +323,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( EdgeMap::itera
 	return make_pair( pt, radius );
 }
 
-Stippler::extents Stippler::getCellExtents( EdgeMap::iterator &cell ) {
+Stippler::extents Stippler::getCellExtents( Stippler::EdgeList &edgeList ) {
 	using std::numeric_limits;
 
 	extents extent;
@@ -308,7 +331,7 @@ Stippler::extents Stippler::getCellExtents( EdgeMap::iterator &cell ) {
 	extent.minX = extent.minY = numeric_limits<float>::max();
 	extent.maxX = extent.maxY = numeric_limits<float>::min();
 
-	for ( EdgeList::iterator value_iter = cell->second.begin(); value_iter != cell->second.end(); ++value_iter ) {
+	for ( EdgeList::iterator value_iter = edgeList.begin(); value_iter != edgeList.end(); ++value_iter ) {
 		if ( value_iter->begin.x < extent.minX ) extent.minX = value_iter->begin.x;
 		if ( value_iter->end.x < extent.minX ) extent.minX = value_iter->end.x;
 		if ( value_iter->begin.y < extent.minY ) extent.minY = value_iter->begin.y;
