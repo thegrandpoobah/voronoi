@@ -29,11 +29,20 @@ THE SOFTWARE.
 
 #include "stipplingparameters.h"
 
+struct StipplePoint {
+	float x;
+	float y;
+	float radius;
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+};
+
 class IStippler {
 public:
 	virtual void distribute() = 0;
 	virtual float getAverageDisplacement() = 0;
-	virtual void render( std::string &output_path ) = 0;
+	virtual void getStipples( StipplePoint *dst ) = 0;
 };
 
 std::auto_ptr<IStippler> make_stippler( const StipplingParameters &parameters );

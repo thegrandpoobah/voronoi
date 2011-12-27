@@ -33,12 +33,14 @@ THE SOFTWARE.
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 
 // boost
 #include <boost/timer.hpp>
 
 // stippler library
 #include <istippler.h>
+#include <bitmap.h> // TODO: This doesn't really belong here
 
 // local
 #include "parse_arguments.h"
@@ -79,6 +81,48 @@ void write_configuration( std::ostream &output, const StipplingParameters &param
 	}
 
 	output << endl;
+}
+
+void render( IStippler *stippler, const StipplingParameters &parameters ) {
+	StipplePoint *points = new StipplePoint[parameters.points];
+
+	stippler->getStipples(points);
+
+	using namespace std;
+
+	ofstream outputStream( parameters.outputFile.c_str() );
+
+	if ( !outputStream.is_open() ) {
+		stringstream s;
+		s << "Unable to open output file " << parameters.outputFile;
+		throw exception(s.str().c_str());
+	}
+
+	Bitmap image(parameters.inputFile);
+
+	outputStream << "<?xml version=\"1.0\" ?>" << endl;
+	outputStream << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" << endl;
+	outputStream << "<svg width=\"" << image.getWidth() << "\" height=\"" << image.getHeight() << "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" << endl;
+	
+	float radius;
+	for ( unsigned int i = 0; i < parameters.points; ++i ) {
+		if ( parameters.fixedRadius ) {
+			radius = 0.5f; // gives circles with 1px diameter
+		} else {
+			radius = points[i].radius;
+		}
+		radius *= parameters.sizingFactor;
+
+		outputStream << "<circle cx=\"" << points[i].x << "\" cy=\"" << points[i].y << "\" r=\"" << radius << "\" fill=\"rgb(" << (unsigned int)points[i].r << "," << (unsigned int)points[i].g << "," << (unsigned int)points[i].b << ")\" />" << endl;
+	}
+	outputStream << "</svg>" << endl;
+
+	outputStream.close();
+	for (unsigned int i = 0; i < parameters.points; i++) {
+		
+	}
+
+	delete[] points;
 }
 
 int main( int argc, char *argv[] ) {
@@ -149,7 +193,7 @@ int main( int argc, char *argv[] ) {
 
 	// render final result to SVG
 	try {
-		stippler->render( parameters->outputFile );
+		render( stippler.get(), *(parameters.get()) );
 	} catch (exception e) {
 		cerr << e.what();
 	}

@@ -24,7 +24,6 @@ THE SOFTWARE.
 #include "stippler.h"
 
 #include <fstream>
-#include <sstream>
 #include <limits>
 
 #include <boost/random.hpp>
@@ -80,41 +79,24 @@ void Stippler::createInitialDistribution() {
 	}
 }
 
-void Stippler::render( std::string &output_path ) {
-	using namespace std;
+void Stippler::getStipples( StipplePoint *dst ) {
+	StipplePoint *workingPtr;
 
-	unsigned char r = 0, g = 0, b = 0;
+	for (unsigned int i = 0; i < parameters.points; i++ ) {
+		workingPtr = &(dst[i]);
 
-	ofstream outputStream( output_path.c_str() );
+		workingPtr->x = vertsX[i];
+		workingPtr->y = vertsY[i];
+		workingPtr->radius = radii[i];
 
-	if ( !outputStream.is_open() ) {
-		stringstream s;
-		s << "Unable to open output file " << output_path;
-		throw exception(s.str().c_str());
-	}
-
-	outputStream << "<?xml version=\"1.0\" ?>" << endl;
-	outputStream << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" << endl;
-	outputStream << "<svg width=\"" << image.getWidth() << "\" height=\"" << image.getHeight() << "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" << endl;
-	
-	float radius;
-	for ( unsigned int i = 0; i < parameters.points; ++i ) {
-		if ( parameters.useColour ) {
-			image.getColour(vertsX[i], vertsY[i], r, g, b);
-		}
-
-		if ( parameters.fixedRadius ) {
-			radius = 0.5f; // gives circles with 1px diameter
+		if (parameters.useColour) {
+			image.getColour(vertsX[i], vertsY[i], workingPtr->r, workingPtr->g, workingPtr->b); 
 		} else {
-			radius = radii[i];
+			workingPtr->r = 0;
+			workingPtr->g = 0;
+			workingPtr->b = 0;
 		}
-		radius *= parameters.sizingFactor;
-
-		outputStream << "<circle cx=\"" << vertsX[i] << "\" cy=\"" << vertsY[i] << "\" r=\"" << radius << "\" fill=\"rgb(" << (int)r << "," << (int)g << "," << (int)b << ")\" />" << endl;
 	}
-	outputStream << "</svg>" << endl;
-
-	outputStream.close();
 }
 
 void Stippler::createVoronoiDiagram() {
@@ -226,7 +208,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( Point<float> &
 	vector<line> clipLines;
 	extents extent = getCellExtents(edgeList);
 
-	int x, y;
+	unsigned int x, y;
 
 	float xDiff = ( extent.maxX - extent.minX );
 	float yDiff = ( extent.maxY - extent.minY );
@@ -257,8 +239,8 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( Point<float> &
 		clipLines.push_back(l);
 	}
 
-	for ( y = 0, yCurrent = extent.minY; y < (int)tileHeight; ++y, yCurrent += yStep ) {
-		for ( x = 0, xCurrent = extent.minX; x < (int)tileWidth; ++x, xCurrent += xStep ) {
+	for ( y = 0, yCurrent = extent.minY; y < tileHeight; ++y, yCurrent += yStep ) {
+		for ( x = 0, xCurrent = extent.minX; x < tileWidth; ++x, xCurrent += xStep ) {
 			// a point is outside of the polygon if it is outside of all clipping planes
 			bool outside = false;
 			for ( vector<line>::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {

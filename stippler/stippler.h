@@ -62,7 +62,7 @@ public:
 
 	void distribute();
 	float getAverageDisplacement();
-	void render( std::string &output_path );
+	void getStipples( StipplePoint *dst );
 protected:
 	void createInitialDistribution();
 	void createVoronoiDiagram();
