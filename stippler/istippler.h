@@ -21,32 +21,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef BITMAP_H
-#define BITMAP_H
-
-#ifdef WIN32
-#define NOMINMAX
-#include <windows.h>
-#endif
+#ifndef ISTIPPLER_H
+#define ISTIPPLER_H
 
 #include <string>
+#include <memory>
 
-#include "picopng.h"
+#include "stipplingparameters.h"
 
-class Bitmap {
+class IStippler {
 public:
-	Bitmap( std::string &filename );
-	~Bitmap();
-
-	float getIntensity( float x, float y );
-
-	void getColour( float x, float y, unsigned char &r, unsigned char &g, unsigned char &b );
-
-	unsigned int getWidth();
-	unsigned int getHeight();
-private:
-	PNG::PNGFile *file;
-	unsigned char *intensityMap;
+	virtual void distribute() = 0;
+	virtual float getAverageDisplacement() = 0;
+	virtual void render( std::string &output_path ) = 0;
 };
 
-#endif // BITMAP_H
+std::auto_ptr<IStippler> make_stippler( const StipplingParameters &parameters );
+
+#endif // ISTIPPLER_H

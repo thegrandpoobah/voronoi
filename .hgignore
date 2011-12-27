@@ -1,16 +1,15 @@
 syntax: glob
 Debug/*
 Release/*
-*.bak
+*PGO/*
 ipch/*
 handin/*
-a2.ncb
-output.svg
-test.png
-tile.png
+*.bak
 voronoi.ncb
+voronoi.opensdf
 voronoi.sdf
 voronoi.suo
-voronoi.vcxproj.filters
-voronoi.vcxproj.user
-voronoi.opensdf
+stippler/stippler.vcxproj.filters
+stippler/stippler.vcxproj.user
+voronoi/voronoi.vcxproj.filters
+voronoi/voronoi.vcxproj.user

@@ -31,13 +31,13 @@ THE SOFTWARE.
 
 #include "VoronoiDiagramGenerator.h"
 
-Stippler::Stippler( std::string &image_path, const StipplingParameters &parameters )
+Stippler::Stippler( const StipplingParameters &parameters )
 : IStippler(),
 parameters(parameters),
 tileWidth(128), tileHeight(128),
 displacement(std::numeric_limits<float>::max()),
 vertsX(new float[parameters.points]), vertsY(new float[parameters.points]), radii(new float[parameters.points]),
-image(image_path) {
+image(parameters.inputFile) {
 	createInitialDistribution();
 }
 
@@ -341,4 +341,10 @@ std::size_t hash_value(Point<float> const& p) {
     hash_combine(seed, p.y);
 
     return seed;
+}
+
+std::auto_ptr<IStippler> make_stippler( const StipplingParameters &parameters ) {
+	using std::auto_ptr;
+
+	return auto_ptr<IStippler>( new Stippler( parameters ) );
 }

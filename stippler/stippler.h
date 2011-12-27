@@ -35,7 +35,7 @@ THE SOFTWARE.
 #include <boost/unordered_map.hpp>
 
 #include "istippler.h"
-#include "parse_arguments.h"
+#include "stipplingparameters.h"
 #include "utility.h"
 #include "bitmap.h"
 
@@ -57,7 +57,7 @@ protected:
 		float c;
 	};
 public:
-	Stippler( std::string &image_path, const StipplingParameters &parameters );
+	Stippler( const StipplingParameters &parameters );
 	~Stippler();
 
 	void distribute();

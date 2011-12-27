@@ -21,16 +21,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef ISTIPPLER_H
-#define ISTIPPLER_H
+#ifndef STIPPLING_PARAMETERS_H
+#define STIPPLING_PARAMETERS_H
 
 #include <string>
 
-class IStippler {
-public:
-	virtual void distribute() = 0;
-	virtual float getAverageDisplacement() = 0;
-	virtual void render( std::string &output_path ) = 0;
+struct StipplingParameters {
+	std::string inputFile;
+	std::string outputFile;
+	unsigned int points;
+	float threshold;
+	bool createLogs;
+	bool useColour;
+	bool noOverlap;
+	bool fixedRadius;
+	float sizingFactor;
 };
 
-#endif // ISTIPPLER_H
+#endif // STIPPLING_PARAMETERS_H

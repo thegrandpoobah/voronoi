@@ -37,10 +37,10 @@ THE SOFTWARE.
 // boost
 #include <boost/timer.hpp>
 
+// stippler library
+#include <istippler.h>
+
 // local
-#include "bitmap.h"
-#include "istippler.h"
-#include "stippler.h"
 #include "parse_arguments.h"
 
 void write_configuration( std::ostream &output, const StipplingParameters &parameters ) {
@@ -111,7 +111,7 @@ int main( int argc, char *argv[] ) {
 	}
 
 	try {
-		stippler = auto_ptr<IStippler>( new Stippler( parameters->inputFile, *( parameters.get() ) ) );
+		stippler = make_stippler( *( parameters.get() ) );
 	} catch ( exception e ) {
 		cerr << e.what() << endl;
 

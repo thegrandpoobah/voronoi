@@ -1,18 +1,44 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voronoi", "voronoi.vcxproj", "{5826684A-8BAF-4C55-87F4-ED785E2578DF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voronoi", "voronoi\voronoi.vcxproj", "{5826684A-8BAF-4C55-87F4-ED785E2578DF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE} = {4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stippler", "stippler\stippler.vcxproj", "{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "errata", "errata", "{4980AD59-F564-46F5-B659-2CFE3AEDA848}"
+	ProjectSection(SolutionItems) = preProject
+		voronoi\license.txt = voronoi\license.txt
+		pgo.bat = pgo.bat
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		PGOInstrument|Win32 = PGOInstrument|Win32
+		PGOOptimize|Win32 = PGOOptimize|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.Debug|Win32.ActiveCfg = Debug|Win32
 		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.Debug|Win32.Build.0 = Debug|Win32
+		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.PGOInstrument|Win32.ActiveCfg = PGOInstrument|Win32
+		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.PGOInstrument|Win32.Build.0 = PGOInstrument|Win32
+		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.PGOOptimize|Win32.ActiveCfg = PGOOptimize|Win32
+		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.PGOOptimize|Win32.Build.0 = PGOOptimize|Win32
 		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.Release|Win32.ActiveCfg = Release|Win32
 		{5826684A-8BAF-4C55-87F4-ED785E2578DF}.Release|Win32.Build.0 = Release|Win32
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Debug|Win32.Build.0 = Debug|Win32
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.PGOInstrument|Win32.ActiveCfg = PGOInstrument|Win32
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.PGOInstrument|Win32.Build.0 = PGOInstrument|Win32
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.PGOOptimize|Win32.ActiveCfg = PGOOptimize|Win32
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.PGOOptimize|Win32.Build.0 = PGOOptimize|Win32
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Release|Win32.ActiveCfg = Release|Win32
+		{4F7A244F-AF33-4A25-A0A0-D1DB6DD404AE}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 #include "bitmap.h"
 
-Bitmap::Bitmap( std::string &filename ) {
+Bitmap::Bitmap( std::string filename ) {
 	using std::ceil;
 
 	file = PNG::load( filename );

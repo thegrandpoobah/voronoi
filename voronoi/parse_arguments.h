@@ -24,22 +24,9 @@ THE SOFTWARE.
 #ifndef PARSE_ARGUMENTS_H
 #define PARSE_ARGUMENTS_H
 
-#include <string>
-#include <vector>
 #include <memory>
-#include <limits>
 
-struct StipplingParameters {
-	std::string inputFile;
-	std::string outputFile;
-	unsigned int points;
-	float threshold;
-	bool createLogs;
-	bool useColour;
-	bool noOverlap;
-	bool fixedRadius;
-	float sizingFactor;
-};
+#include <stipplingparameters.h>
 
 std::auto_ptr<StipplingParameters> parseArguments( int argc, char *argv[] );
 
