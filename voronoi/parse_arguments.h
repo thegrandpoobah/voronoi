@@ -31,6 +31,7 @@ THE SOFTWARE.
 namespace Voronoi {
 	struct StipplingParameters : ::StipplingParameters {
 		std::string outputFile;
+		bool createLogs;
 	};
 }
 
