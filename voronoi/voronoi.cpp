@@ -164,6 +164,7 @@ int main( int argc, char *argv[] ) {
 	try {
 		stippler = create_stippler( parameters.get() );
 	} catch ( exception e ) {
+		delete[] parameters.get()->inputFile;
 		cerr << e.what() << endl;
 
 		return -1;
@@ -202,6 +203,8 @@ int main( int argc, char *argv[] ) {
 	} catch (exception e) {
 		cerr << e.what();
 	}
+
+	delete[] parameters.get()->inputFile;
 
 	if ( parameters->createLogs ) {
 		log.close();

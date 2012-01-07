@@ -41,7 +41,7 @@ extern "C" {
 typedef void * STIPPLER_HANDLE;
 
 struct StipplingParameters {
-	const char *inputFile;
+	char *inputFile;
 	unsigned int points;
 	bool noOverlap;
 	unsigned int subpixels;

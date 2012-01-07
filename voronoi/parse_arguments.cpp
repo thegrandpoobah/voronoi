@@ -111,7 +111,9 @@ std::auto_ptr<Voronoi::StipplingParameters> parseArguments( int argc, char *argv
 
 		auto_ptr<Voronoi::StipplingParameters> params( new Voronoi::StipplingParameters() );
 
-		params->inputFile = vm["input-file"].as<string>().c_str();
+		string inputFile = vm["input-file"].as<string>();
+		params->inputFile = new char[inputFile.length() + 1]; memset(params->inputFile, 0, inputFile.length() + 1);
+		inputFile.copy(params->inputFile, inputFile.length());
 		params->outputFile = vm["output-file"].as<string>();
 
 		params->points = vm["stipples"].as<unsigned int>();
