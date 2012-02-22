@@ -34,6 +34,7 @@ THE SOFTWARE.
 #include <iomanip>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 
 // boost
 #include <boost/timer.hpp>
@@ -97,7 +98,8 @@ void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &param
 	if ( !outputStream.is_open() ) {
 		stringstream s;
 		s << "Unable to open output file " << parameters.outputFile;
-		throw exception(s.str().c_str());
+                std::cout << s.str().c_str() << std::endl;
+		throw exception();
 	}
 
 	PNG::PNGFile *png = PNG::load( parameters.inputFile );
