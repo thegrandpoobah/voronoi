@@ -1,5 +1,7 @@
 // WITH Minor modifications from Sahab Yazdani
 
+#include <cstddef>
+#include <string.h>
 #include <vector>
 
 
@@ -563,7 +565,7 @@ void loadFile(std::vector<unsigned char>& buffer, const std::string& filename) /
   else buffer.clear();
 }
 
-int main(int argc, char *argv[])
+int example_main(int argc, char *argv[])
 {
   const char* filename = argc > 1 ? argv[1] : "test.png";
   
@@ -615,7 +617,8 @@ void loadFile(std::vector<unsigned char>& buffer, const std::string& filename) /
 	stringstream s;
 
 	s << "Unable to open input file " << filename;
-	throw exception(s.str().c_str());
+        std::cout << s.str().c_str() << std::endl;
+	throw exception();
   }
 
   //get filesize
@@ -657,7 +660,8 @@ PNGFile *load( const std::string &filename )
 	  stringstream s;
 
 	  s << filename << " does not seem to be a PNG image.";
-	  throw exception( s.str().c_str() );
+          std::cout << s.str().c_str() << std::endl;
+	  throw exception();
   }
   
   newPngFile->data = new unsigned char[image.size()];
