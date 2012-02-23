@@ -1,6 +1,6 @@
-CXXFLAGS =	-fpermissive -fopenmp
+CXXFLAGS =	-fpermissive -fopenmp -O2
 
-LNKFLAGS =	-fopenmp
+LNKFLAGS =	-fopenmp -O2
 
 INCLUDES =	-I./picopng -I./stippler -I./voronoi
 
