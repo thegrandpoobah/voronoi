@@ -141,7 +141,7 @@ void Stippler::redistributeStipples() {
 
 	displacement = 0.0f;
 
-	#pragma omp for private(distance)
+	#pragma omp parallel for private(distance)
 	for (int i = 0; i < (int)vectorized.size(); i++) {
 		pair< Point< float >, EdgeList > item = vectorized[i];
 		pair< Point<float>, float > centroid = calculateCellCentroid( item.first, item.second );

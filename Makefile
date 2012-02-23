@@ -1,4 +1,6 @@
-CXXFLAGS =	-fpermissive
+CXXFLAGS =	-fpermissive -fopenmp
+
+LNKFLAGS =	-fopenmp
 
 INCLUDES =	-I./picopng -I./stippler -I./voronoi
 
@@ -14,7 +16,7 @@ all:	voronoi_stippler
 
 
 voronoi_stippler:	$(OBJS)
-	$(CXX) -o voronoi_stippler $(OBJS) $(LIBS)
+	$(CXX) $(LNKFLAGS) -o voronoi_stippler $(OBJS) $(LIBS)
 
 clean:
 	rm -f $(OBJS)
