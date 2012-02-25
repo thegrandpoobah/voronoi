@@ -98,8 +98,7 @@ void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &param
 	if ( !outputStream.is_open() ) {
 		stringstream s;
 		s << "Unable to open output file " << parameters.outputFile;
-                std::cout << s.str().c_str() << std::endl;
-		throw exception();
+		throw runtime_error(s.str());
 	}
 
 	PNG::PNGFile *png = PNG::load( parameters.inputFile );
@@ -147,12 +146,16 @@ int main( int argc, char *argv[] ) {
 
 	auto_ptr<Voronoi::StipplingParameters> parameters;
 	
+	stippler_lib_init();
+	::atexit(stippler_lib_destroy);
+
 	try {
 		parameters = parseArguments( argc, argv );
 		if (parameters.get() == NULL) {
+			stippler_lib_destroy();
 			return 0;
 		}
-	} catch ( exception e ) {
+	} catch ( exception const &e ) {
 		return -1;
 	}
 
@@ -163,11 +166,10 @@ int main( int argc, char *argv[] ) {
 		log.open( "log.txt" );
 	}
 
-	try {
-		stippler = create_stippler( parameters.get() );
-	} catch ( exception e ) {
+	stippler = create_stippler( parameters.get() );
+	if (stippler == NULL) {
 		delete[] parameters.get()->inputFile;
-		cerr << e.what() << endl;
+		cerr << stippler_getLastError() << endl;
 
 		return -1;
 	}
@@ -202,7 +204,7 @@ int main( int argc, char *argv[] ) {
 	// render final result to SVG
 	try {
 		render( stippler, *(parameters.get()) );
-	} catch (exception e) {
+	} catch (exception const &e) {
 		cerr << e.what();
 	}
 

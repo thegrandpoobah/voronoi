@@ -25,8 +25,38 @@ THE SOFTWARE.
 #include "stippler.h"
 #include "stippler_impl.h"
 
+namespace {
+	char *last_error_message = NULL;
+
+	void setLastError(const char *what) {
+		if (last_error_message != NULL) {
+			delete[] last_error_message;
+		}
+
+		last_error_message = new char[::strlen(what) + 1];
+		::memset(last_error_message, 0, ::strlen(what) + 1);
+		::strncpy(last_error_message, what, ::strlen(what));
+	}
+}
+
+void stippler_lib_init() {
+	// there is nothing to init
+}
+
+void stippler_lib_destroy() {
+	if (last_error_message != NULL) {
+		delete[] last_error_message;
+		last_error_message = NULL;
+	}
+}
+
 STIPPLER_HANDLE create_stippler( StipplingParameters *parameters ) {
-	return reinterpret_cast<STIPPLER_HANDLE>( new Stippler( *parameters ) );
+	try {
+		return reinterpret_cast<STIPPLER_HANDLE>( new Stippler( *parameters ) );
+	} catch (std::runtime_error const &e) {
+		setLastError(e.what());
+		return NULL;
+	}
 }
 
 void destroy_stippler( STIPPLER_HANDLE handle ) {
@@ -43,4 +73,8 @@ float stippler_getAverageDisplacement( STIPPLER_HANDLE handle ) {
 
 void stippler_getStipples( STIPPLER_HANDLE handle, StipplePoint *dst ) {
 	return (reinterpret_cast<IStippler *>(handle))->getStipples(dst);
+}
+
+const char *stippler_getLastError() {
+	return last_error_message;
 }

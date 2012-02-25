@@ -56,12 +56,17 @@ struct StipplePoint {
 	unsigned char b;
 };
 
+STIPPLER_METHOD void stippler_lib_init();
+STIPPLER_METHOD void stippler_lib_destroy();
+
 STIPPLER_METHOD STIPPLER_HANDLE create_stippler( StipplingParameters *parameters );
 STIPPLER_METHOD void destroy_stippler( STIPPLER_HANDLE handle );
 
 STIPPLER_METHOD void stippler_distribute( STIPPLER_HANDLE handle );
 STIPPLER_METHOD float stippler_getAverageDisplacement( STIPPLER_HANDLE handle );
 STIPPLER_METHOD void stippler_getStipples( STIPPLER_HANDLE handle, StipplePoint *dst );
+
+STIPPLER_METHOD const char *stippler_getLastError();
 
 #ifdef __cplusplus
 }

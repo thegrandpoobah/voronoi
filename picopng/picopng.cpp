@@ -607,7 +607,7 @@ void loadFile(std::vector<unsigned char>& buffer, const std::string& filename) /
 {
   using std::ifstream;
   using std::ios;
-  using std::exception;
+  using std::runtime_error;
   using std::stringstream;
   using std::streamsize;
 
@@ -617,8 +617,7 @@ void loadFile(std::vector<unsigned char>& buffer, const std::string& filename) /
 	stringstream s;
 
 	s << "Unable to open input file " << filename;
-        std::cout << s.str().c_str() << std::endl;
-	throw exception();
+	throw runtime_error(s.str());
   }
 
   //get filesize
@@ -646,7 +645,7 @@ PNGFile *load( const std::string &filename )
 {
   using std::vector;
   using std::stringstream;
-  using std::exception;
+  using std::runtime_error;
   
   PNGFile *newPngFile = new PNGFile();
 
@@ -660,8 +659,7 @@ PNGFile *load( const std::string &filename )
 	  stringstream s;
 
 	  s << filename << " does not seem to be a PNG image.";
-          std::cout << s.str().c_str() << std::endl;
-	  throw exception();
+	  throw runtime_error(s.str());
   }
   
   newPngFile->data = new unsigned char[image.size()];

@@ -126,7 +126,7 @@ std::auto_ptr<Voronoi::StipplingParameters> parseArguments( int argc, char *argv
 		params->subpixels = vm["subpixels"].as<unsigned int>();
 
 		return params;
-	} catch ( exception e ) {
+	} catch ( exception const &e ) {
 		cerr << e.what() << endl;
 		cout << endl;
 		showSamples();
