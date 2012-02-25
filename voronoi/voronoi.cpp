@@ -144,6 +144,8 @@ int main( int argc, char *argv[] ) {
 	using std::min;
 	using boost::timer;
 
+	timer total_profiler;
+	
 	auto_ptr<Voronoi::StipplingParameters> parameters;
 	
 	stippler_lib_init();
@@ -181,15 +183,12 @@ int main( int argc, char *argv[] ) {
 
 	int iteration = 0;
 	float t = parameters->threshold + 1.0f;
+	timer iteration_profiler;
+	
 	do {
-		timer profiler;
+		iteration_profiler.restart();
 
 		stippler_distribute(stippler);
-
-		if ( parameters->createLogs ) {
-			log << "Iteration " << (++iteration) << " completed in " << profiler.elapsed() << " seconds." << endl;
-			cout << "Iteration " << iteration << " completed in " << profiler.elapsed() << " seconds." << endl;
-		}
 
 		t = stippler_getAverageDisplacement( stippler );
 
@@ -199,6 +198,11 @@ int main( int argc, char *argv[] ) {
 		}
 
 		cout << setiosflags(ios::fixed) << setprecision(2) << min((parameters->threshold / t * 100), 100.0f) << "% Complete" << endl; 
+
+		if ( parameters->createLogs ) {
+			log << "Iteration " << (++iteration) << " completed in " << iteration_profiler.elapsed() << " seconds." << endl;
+			cout << "Iteration " << iteration << " completed in " << iteration_profiler.elapsed() << " seconds." << endl;
+		}
 	} while ( t > parameters->threshold );
 
 	// render final result to SVG
@@ -215,6 +219,8 @@ int main( int argc, char *argv[] ) {
 	}
 
 	destroy_stippler( stippler );
+
+	cout << "Completed in " << total_profiler.elapsed() << " seconds." << endl;
 
 	return 0;
 }
