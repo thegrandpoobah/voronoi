@@ -34,6 +34,7 @@ THE SOFTWARE.
 #include <iomanip>
 #include <fstream>
 #include <sstream>
+#include <vector>
 #include <cmath>
 
 // boost
@@ -87,11 +88,14 @@ void write_configuration( std::ostream &output, const Voronoi::StipplingParamete
 }
 
 void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &parameters ) {
-	StipplePoint *points = new StipplePoint[parameters.points];
+	using std::vector;
+	using std::ofstream;
+	using std::stringstream;
+	using std::endl;
+	using std::runtime_error;
 
-	stippler_getStipples(stippler, points);
-
-	using namespace std;
+	vector<StipplePoint> points(parameters.points);
+	stippler_getStipples(stippler, &points[0]);
 
 	ofstream outputStream( parameters.outputFile.c_str() );
 
@@ -109,26 +113,23 @@ void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &param
 	outputStream << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" << endl;
 	outputStream << "<svg width=\"" << w << "\" height=\"" << h << "\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">" << endl;
 	
-	float radius;
-	for ( unsigned int i = 0; i < parameters.points; ++i ) {
+	for ( vector<StipplePoint>::iterator iter = points.begin(); iter != points.end(); ++iter) {
+		float radius = parameters.sizingFactor;
 		if ( parameters.fixedRadius ) {
-			radius = 0.5f; // gives circles with 1px diameter
+			radius *= 0.5f; // gives circles with 1px diameter
 		} else {
-			radius = points[i].radius;
+			radius *= iter->radius;
 		}
-		radius *= parameters.sizingFactor;
 
 		if ( !parameters.useColour ) {
-			points[i].r = points[i].g = points[i].b = 0;
+			iter->r = iter->g = iter->b = 0;
 		}
 
-		outputStream << "<circle cx=\"" << points[i].x << "\" cy=\"" << points[i].y << "\" r=\"" << radius << "\" fill=\"rgb(" << (unsigned int)points[i].r << "," << (unsigned int)points[i].g << "," << (unsigned int)points[i].b << ")\" />" << endl;
+		outputStream << "<circle cx=\"" << iter->x << "\" cy=\"" << iter->y << "\" r=\"" << radius << "\" fill=\"rgb(" << (unsigned int)iter->r << "," << (unsigned int)iter->g << "," << (unsigned int)iter->b << ")\" />" << endl;
 	}
 	outputStream << "</svg>" << endl;
 
 	outputStream.close();
-
-	delete[] points;
 }
 
 int main( int argc, char *argv[] ) {
