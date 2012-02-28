@@ -61,7 +61,7 @@ void Stippler::createInitialDistribution() {
 	boost::mt19937 rng;
 	boost::uniform_01<boost::mt19937, float> generator( rng );
 
-	float w = (float)image.getWidth(), h = (float)image.getHeight();
+	float w = (float)(image.getWidth() - 1), h = (float)(image.getHeight() - 1);
 	float xC, yC;
 
 	for ( unsigned int i = 0; i < parameters.points; ) {
@@ -97,7 +97,7 @@ void Stippler::createVoronoiDiagram() {
 	VoronoiDiagramGenerator generator;
 
 	generator.generateVoronoi( vertsX, vertsY, parameters.points, 
-		0.0f, (float)image.getWidth(), 0.0f, (float)image.getHeight(), 0.0f/*::sqrt(8.0f) + 0.1f*/ );
+		0.0f, (float)(image.getWidth() - 1), 0.0f, (float)(image.getHeight() - 1), 0.0f/*::sqrt(8.0f) + 0.1f*/ );
 
 	edges.clear();
 
