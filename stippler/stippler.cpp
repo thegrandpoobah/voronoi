@@ -97,7 +97,7 @@ void Stippler::createVoronoiDiagram() {
 	VoronoiDiagramGenerator generator;
 
 	generator.generateVoronoi( vertsX, vertsY, parameters.points, 
-		0.0f, (float)(image.getWidth() - 1), 0.0f, (float)(image.getHeight() - 1), 0.0f/*::sqrt(8.0f) + 0.1f*/ );
+		0.0f, (float)(image.getWidth() - 1), 0.0f, (float)(image.getHeight() - 1) );
 
 	edges.clear();
 
