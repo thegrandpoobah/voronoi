@@ -131,28 +131,23 @@ void Stippler::redistributeStipples() {
 	using std::make_pair;
 	using std::vector;
 
-	unsigned int j = 0;
-	float distance, local_displacement;
-
 	vector< pair< Point< float >, EdgeList > > vectorized;
 	for ( EdgeMap::iterator key_iter = edges.begin(); key_iter != edges.end(); ++key_iter ) {
 		vectorized.push_back(make_pair(key_iter->first, key_iter->second));
 	}
 
-	local_displacement = displacement = 0.0f;
+	float local_displacement = 0.0f;
 
-	#pragma omp parallel for private(distance) reduction(+:local_displacement)
+	#pragma omp parallel for reduction(+:local_displacement)
 	for (int i = 0; i < (int)vectorized.size(); i++) {
 		pair< Point< float >, EdgeList > item = vectorized[i];
 		pair< Point<float>, float > centroid = calculateCellCentroid( item.first, item.second );
-
-		distance = sqrt( pow( item.first.x - centroid.first.x, 2.0f ) + pow( item.first.y - centroid.first.y, 2.0f ) );
 
 		radii[i] = centroid.second;
 		vertsX[i] = centroid.first.x;
 		vertsY[i] = centroid.first.y;
 
-		local_displacement += distance;
+		local_displacement += sqrt( pow( item.first.x - centroid.first.x, 2.0f ) + pow( item.first.y - centroid.first.y, 2.0f ) );
 	}
 
 	displacement = local_displacement / vectorized.size(); // average out the displacement
