@@ -34,6 +34,8 @@ THE SOFTWARE.
 #define STIPPLER_METHOD
 #endif
 
+#include <cstring>
+
 #ifdef __cplusplus
 extern "C" {
 #endif 

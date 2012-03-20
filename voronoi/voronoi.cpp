@@ -36,6 +36,7 @@ THE SOFTWARE.
 #include <sstream>
 #include <vector>
 #include <cmath>
+#include <stdexcept>
 
 // boost
 #include <boost/timer.hpp>

@@ -1,5 +1,6 @@
 // WITH Minor modifications from Sahab Yazdani
 
+#include <stdexcept>
 #include <cstddef>
 #include <string.h>
 #include <vector>
