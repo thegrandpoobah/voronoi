@@ -24,7 +24,7 @@ THE SOFTWARE.
 #ifndef STIPPLER_H
 #define STIPPLER_H
 
-#ifdef WIN32
+#ifdef _WIN32
 #ifdef STIPPLER_LIBRARY
 #define STIPPLER_METHOD __declspec(dllexport)
 #else
@@ -33,8 +33,6 @@ THE SOFTWARE.
 #else
 #define STIPPLER_METHOD
 #endif
-
-#include <cstring>
 
 #ifdef __cplusplus
 extern "C" {

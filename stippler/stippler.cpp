@@ -25,6 +25,7 @@ THE SOFTWARE.
 
 #include <fstream>
 #include <limits>
+#include <cstring>
 
 #include <boost/random.hpp>
 

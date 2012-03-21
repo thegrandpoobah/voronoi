@@ -21,11 +21,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifdef WIN32
-// needed by opengl
+#ifdef _WIN32
+// conflicts with std::min/max
 #define NOMINMAX
 #include <windows.h>
-#endif // WIN32
+#endif // _WIN32
 
 // stl
 #include <string>

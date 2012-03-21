@@ -24,10 +24,10 @@ THE SOFTWARE.
 #ifndef BITMAP_H
 #define BITMAP_H
 
-#ifdef WIN32
+#ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
-#endif
+#endif // _WIN32
 
 #include <string>
 

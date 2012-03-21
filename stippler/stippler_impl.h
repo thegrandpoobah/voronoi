@@ -24,10 +24,10 @@ THE SOFTWARE.
 #ifndef STIPPLER_IMPL_H
 #define STIPPLER_IMPL_H
 
-#ifdef WIN32
+#ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
-#endif // WIN32
+#endif // _WIN32
 
 #include <string>
 #include <vector>
