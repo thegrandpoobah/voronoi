@@ -112,7 +112,6 @@
     <ClCompile Include="stippler.cpp" />
     <ClCompile Include="bitmap.cpp" />
     <ClCompile Include="stippler_api.cpp" />
-    <ClCompile Include="utility.cpp" />
     <ClCompile Include="VoronoiDiagramGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>

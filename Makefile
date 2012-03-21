@@ -11,7 +11,7 @@ INCLUDES =	-I./picopng -I./stippler -I./voronoi
 
 LIBS =		-lboost_program_options
 
-OBJS =	picopng/picopng.o stippler/bitmap.o stippler/stippler_api.o stippler/stippler.o stippler/utility.o stippler/VoronoiDiagramGenerator.o voronoi/parse_arguments.o voronoi/voronoi.o
+OBJS =	picopng/picopng.o stippler/bitmap.o stippler/stippler_api.o stippler/stippler.o stippler/VoronoiDiagramGenerator.o voronoi/parse_arguments.o voronoi/voronoi.o
 
 VPATH =	%.cpp
 

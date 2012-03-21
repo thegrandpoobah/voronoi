@@ -43,19 +43,6 @@ class Stippler : public IStippler {
 protected:
 	typedef std::vector< Edge< float > > EdgeList;
 	typedef boost::unordered_map< Point < float >, EdgeList > EdgeMap;
-
-	struct extents {
-		float minX;
-		float minY;
-		float maxX;
-		float maxY;
-	};
-
-	struct line {
-		float a;
-		float b;
-		float c;
-	};
 public:
 	Stippler( const StipplingParameters &parameters );
 	~Stippler();
@@ -67,12 +54,12 @@ protected:
 	void createInitialDistribution();
 	void createVoronoiDiagram();
 
-	extents getCellExtents( EdgeList &edgeList );
+	Extents<float> getCellExtents( EdgeList &edgeList );
 
 	void redistributeStipples();
 
 	std::pair< Point<float>, float > calculateCellCentroid( Point<float> &inside, EdgeList &edgeList );
-	line createClipLine( float insideX, float insideY, float x1, float y1, float x2, float y2 );
+	Line<float> createClipLine( float insideX, float insideY, float x1, float y1, float x2, float y2 );
 protected:
 	EdgeMap edges;
 

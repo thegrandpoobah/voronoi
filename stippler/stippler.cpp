@@ -154,11 +154,11 @@ void Stippler::redistributeStipples() {
 	displacement = local_displacement / vectorized.size(); // average out the displacement
 }
 
-inline Stippler::line Stippler::createClipLine( float insideX, float insideY, float x1, float y1, float x2, float y2 ) {
+inline Line<float> Stippler::createClipLine( float insideX, float insideY, float x1, float y1, float x2, float y2 ) {
 	using std::abs;
 	using std::numeric_limits;
 
-	Stippler::line l;
+	Line<float> l;
 
 	// if the floating point version of the line collapsed down to one
 	// point, then just ignore it all
@@ -194,8 +194,8 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( Point<float> &
 	using std::sqrt;
 	using std::pow;
 
-	vector<line> clipLines;
-	extents extent = getCellExtents(edgeList);
+	vector< Line<float> > clipLines;
+	Extents<float> extent = getCellExtents(edgeList);
 
 	unsigned int x, y;
 
@@ -217,7 +217,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( Point<float> &
 
 	// compute the clip lines
 	for ( EdgeList::iterator value_iter = edgeList.begin(); value_iter != edgeList.end(); ++value_iter ) {
-		line l = createClipLine( inside.x, inside.y, 
+		Line<float> l = createClipLine( inside.x, inside.y, 
 			value_iter->begin.x, value_iter->begin.y,
 			value_iter->end.x, value_iter->end.y );
 	
@@ -232,7 +232,7 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( Point<float> &
 		for ( x = 0, xCurrent = extent.minX; x < tileWidth; ++x, xCurrent += xStep ) {
 			// a point is outside of the polygon if it is outside of all clipping planes
 			bool outside = false;
-			for ( vector<line>::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {
+			for ( vector< Line<float> >::iterator iter = clipLines.begin(); iter != clipLines.end(); iter++ ) {
 				if ( xCurrent * iter->a + yCurrent * iter->b + iter->c >= 0.0f ) {
 					outside = true;
 					break;
@@ -293,10 +293,10 @@ std::pair< Point<float>, float > Stippler::calculateCellCentroid( Point<float> &
 	return make_pair( pt, radius );
 }
 
-Stippler::extents Stippler::getCellExtents( Stippler::EdgeList &edgeList ) {
+Extents<float> Stippler::getCellExtents( Stippler::EdgeList &edgeList ) {
 	using std::numeric_limits;
 
-	extents extent;
+	Extents<float> extent;
 
 	extent.minX = extent.minY = numeric_limits<float>::max();
 	extent.maxX = extent.maxY = numeric_limits<float>::min();

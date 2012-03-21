@@ -24,8 +24,6 @@ THE SOFTWARE.
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include <limits>
-
 template <class T>
 struct Point {
 	T x;
@@ -38,6 +36,19 @@ struct Edge {
 	Point<T> end;
 };
 
-extern const float PI;
+template <class T>
+struct Extents {
+	T minX;
+	T minY;
+	T maxX;
+	T maxY;
+};
+
+template <class T>
+struct Line {
+	T a;
+	T b;
+	T c;
+};
 
 #endif // UTILITY_H
