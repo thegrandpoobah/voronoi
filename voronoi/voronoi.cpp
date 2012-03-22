@@ -159,7 +159,7 @@ int main( int argc, char *argv[] ) {
 			stippler_lib_destroy();
 			return 0;
 		}
-	} catch ( exception const &e ) {
+	} catch ( ... ) {
 		return -1;
 	}
 
