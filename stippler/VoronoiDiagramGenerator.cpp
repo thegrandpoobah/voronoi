@@ -749,7 +749,7 @@ void VoronoiDiagramGenerator::plotinit()
 void VoronoiDiagramGenerator::clip_line(struct VoronoiDiagramGenerator::Edge *e)
 {
 	struct Site *s1, *s2;
-	float x1=0,x2=0,y1=0,y2=0, temp = 0;;
+	float x1=0,x2=0,y1=0,y2=0;
 	float s1x, s2x, s1y, s2y;
 
 	s1x = x1 = e->reg[0]->coord.x;
