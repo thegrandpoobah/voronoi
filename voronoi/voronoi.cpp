@@ -45,7 +45,7 @@ THE SOFTWARE.
 #include <picopng.h>
 
 // stippler library
-#include <istippler.h>
+#include <stippler.h>
 
 // local
 #include "parse_arguments.h"
