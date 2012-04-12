@@ -11,7 +11,7 @@ Usage instructions are available via the
 ## Windows Binary
 
 A Windows binary is available via the 
-[project homepage](http://www.saliences.com/projects/npr/stippling/stippling.html).
+[project homepage](http://www.saliences.com/projects/npr/stippling/index.html).
 
 ## Building from Source
 
