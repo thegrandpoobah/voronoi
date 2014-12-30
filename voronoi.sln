@@ -14,7 +14,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stippler", "stippler\stippl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "errata", "errata", "{4980AD59-F564-46F5-B659-2CFE3AEDA848}"
 	ProjectSection(SolutionItems) = preProject
-		voronoi\license.txt = voronoi\license.txt
+		license.txt = license.txt
 		README.md = README.md
 	EndProjectSection
 EndProject
