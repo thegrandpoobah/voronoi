@@ -182,7 +182,7 @@ private:
 	void PQdelete(struct Halfedge *he);
 	bool ELinitialize();
 	void ELinsert(struct	Halfedge *lb, struct Halfedge *newHe);
-	struct Halfedge * VoronoiDiagramGenerator::ELgethash(int b);
+	struct Halfedge * ELgethash(int b);
 	struct Halfedge *ELleft(struct Halfedge *he);
 	struct Site *leftreg(struct Halfedge *he);
 	void out_site(struct Site *s);
