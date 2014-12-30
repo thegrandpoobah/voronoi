@@ -33,10 +33,10 @@ THE SOFTWARE.
 
 Stippler::Stippler( const StipplingParameters &parameters )
 : IStippler(),
-parameters(parameters),
-displacement(std::numeric_limits<float>::max()),
 vertsX(new float[parameters.points]), vertsY(new float[parameters.points]), radii(new float[parameters.points]),
-image(parameters.inputFile) {
+displacement(std::numeric_limits<float>::max()),
+image(parameters.inputFile),
+parameters(parameters) {
 	createInitialDistribution();
 }
 
