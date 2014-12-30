@@ -204,10 +204,10 @@ private:
 
 	void pushGraphEdge(float x1, float y1, float x2, float y2, float s1x, float s1y, float s2x, float s2y);
 
-	void VoronoiDiagramGenerator::openpl();
-	void VoronoiDiagramGenerator::line(float x1, float y1, float x2, float y2,float s1x, float s1y, float s2x, float s2y);
-	void VoronoiDiagramGenerator::circle(float x, float y, float radius);
-	void VoronoiDiagramGenerator::range(float minX, float minY, float maxX, float maxY);
+	void openpl();
+	void line(float x1, float y1, float x2, float y2,float s1x, float s1y, float s2x, float s2y);
+	void circle(float x, float y, float radius);
+	void range(float minX, float minY, float maxX, float maxY);
 
 
 	struct  Freelist	hfl;
