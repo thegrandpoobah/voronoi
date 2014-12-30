@@ -34,6 +34,8 @@ public:
 	virtual void distribute() = 0;
 	virtual float getAverageDisplacement() = 0;
 	virtual void getStipples( StipplePoint *dst ) = 0;
+
+	virtual ~IStippler() {};
 };
 
 #endif // ISTIPPLER_H
