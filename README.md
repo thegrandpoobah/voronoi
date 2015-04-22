@@ -26,11 +26,11 @@ A makefile was contributed (thanks!) which can be used to build a binary
 from source on Mac OS X. Using [Homebrew](http://brew.sh/), you can quickly 
 install Boost as a necessary dependency.
 
-  brew install boost
+    brew install boost
 
 Then, simply compile with 
 
-  make
+    make
 
 Note that by default, Mac OS X uses the Clang compiler which does not support
 the [OpenMP](http://openmp.org) library and as such will see significant
