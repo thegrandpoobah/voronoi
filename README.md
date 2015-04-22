@@ -38,7 +38,7 @@ deterioriated performance. GCC is available for Mac OS X and can be used
 to compile the application, but installing GCC, Boost, and OpenMP are beyond
 the scope of this document.
 
-## Building on Linux
+### Building on Linux
 
 The makefile works on Linux as well, so as long as you install Boost and OpenMP
 on your machine (either using your distribution's package manager or via source),
