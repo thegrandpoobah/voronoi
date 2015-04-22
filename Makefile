@@ -1,25 +1,21 @@
-# make sure to uncomment the right OS before compiling
-# TARGET_OS = macos
-TARGET_OS = linux
-# TARGET_OS = win
+OPENMPFLAG = -fopenmp
 
-CXXFLAGS =	-Wall -fpermissive -fopenmp -O2
+CXXFLAGS =	-Wall -fpermissive $(OPENMPFLAG) -O2
 
-LNKFLAGS =	-fopenmp -O2
+LNKFLAGS =	$(OPENMPFLAG) -O2
 
 INCLUDES =	-I./picopng -I./stippler -I./voronoi
 
-LIBS =		-lboost_program_options
+LIBS = -lboost_program_options
 
 OBJS =	picopng/picopng.o stippler/bitmap.o stippler/stippler_api.o stippler/stippler.o stippler/VoronoiDiagramGenerator.o voronoi/parse_arguments.o voronoi/voronoi.o
 
 VPATH =	%.cpp
 
-ifeq ($(TARGET_OS),macos)
-	# reset compiler, default compiler is clang now, which does not support OpenMP
-	CXX = g++
-	CXXFLAGS += -I/opt/local/include -I/opt/local/include/boost
-	LNKFLAGS += -L/opt/local/lib/
+# openmp is not available on Mac OS X when using Clang
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	OPENMPFLAG =
 endif
 
 all:	voronoi_stippler
