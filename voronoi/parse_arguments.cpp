@@ -74,9 +74,12 @@ std::auto_ptr<Voronoi::StipplingParameters> parseArguments( int argc, char *argv
 
 	options_description advancedOpts( "Advanced Options" );
 	advancedOpts.add_options()
+        ( "state-file", value< string >(), "The state file to use to seed the algorithm. This overrides the stipple count parameter." )
+        ( "format,f", value< string >()->default_value("svg", "svg"), "Output format (options are svg or tsp)" )
+        ( "generate-raw", "Generate a raw output of the stippler results. Useful for post-processing." )
 		( "threshold,t", value< float >()->default_value(0.1f, "0.1"), "How long to wait for Voronoi diagram to converge" )
 		( "no-overlap,n", "Ensure that stipple points do not overlap with each other" )
-		( "fixed-radius,f", "Fixed radius stipple points imply a significant loss of tonal properties" )
+		( "fixed-radius", "Fixed radius stipple points imply a significant loss of tonal properties" )
 		( "sizing-factor,z", value< float >()->default_value(1.0f, "1.0"), "The final stipple radius is multiplied by this factor" )
 		( "subpixels,p", value< int >()->default_value(5, "5"), "Controls the tile size of centroid computations." )
 		( "log,l", "Determines output verbosity" );
@@ -129,6 +132,7 @@ std::auto_ptr<Voronoi::StipplingParameters> parseArguments( int argc, char *argv
 		params->useColour = vm.count("colour-output") > 0;
 		params->noOverlap = vm.count("no-overlap") > 0;
 		params->fixedRadius = vm.count("fixed-radius") > 0;
+        params->generateRaw = vm.count("generate-raw") > 0;
 		if (vm["sizing-factor"].as<float>() < 0.0f) {
 			throw runtime_error("Sizing factor parameter must be greater than 0.");
 		}
@@ -137,6 +141,11 @@ std::auto_ptr<Voronoi::StipplingParameters> parseArguments( int argc, char *argv
 			throw runtime_error("Sub-pixel density parameter must be greater than or equal to 1.");
 		}
 		params->subpixels = (unsigned int)vm["subpixels"].as<int>();
+        params->outputFormat = vm["format"].as<string>();
+        if (params->outputFormat.compare("svg") != 0 && params->outputFormat.compare("tsp") != 0) {
+            throw runtime_error("Output Format is not a known output format");
+        }
+        params->stateFile = vm["state-file"].as<string>();
 
 		return params;
 	} catch ( exception const &e ) {

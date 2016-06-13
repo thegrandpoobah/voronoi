@@ -30,7 +30,10 @@ THE SOFTWARE.
 
 namespace Voronoi {
 	struct StipplingParameters : ::StipplingParameters {
+        std::string stateFile;
 		std::string outputFile;
+        std::string outputFormat;
+        bool generateRaw;
 		bool createLogs;
 		float threshold;
 		bool useColour;

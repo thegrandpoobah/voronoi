@@ -88,7 +88,34 @@ void write_configuration( std::ostream &output, const Voronoi::StipplingParamete
 	output << endl;
 }
 
-void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &parameters ) {
+void set_stippler_state( STIPPLER_HANDLE stippler, Voronoi::StipplingParameters &parameters ) {
+    using std::ifstream;
+    using std::endl;
+    using std::cout;
+    using std::stringstream;
+    using std::runtime_error;
+    
+    ifstream inputStream( parameters.stateFile.c_str() );
+    
+	if ( !inputStream.is_open() ) {
+		stringstream s;
+		s << "Unable to open state file " << parameters.stateFile;
+		throw runtime_error(s.str());
+	}
+    
+    inputStream >> parameters.points;
+    
+    for (unsigned int i = 0; i < parameters.points; i++) {
+        float x, y, radius;
+        int r, g, b;
+        
+        inputStream >> x >> y >> radius >> r >> g >> b;
+    }
+    
+    inputStream.close();
+}
+
+void render_svg( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &parameters ) {
 	using std::vector;
 	using std::ofstream;
 	using std::stringstream;
@@ -129,6 +156,74 @@ void render( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &param
 		outputStream << "<circle cx=\"" << iter->x << "\" cy=\"" << iter->y << "\" r=\"" << radius << "\" fill=\"rgb(" << (unsigned int)iter->r << "," << (unsigned int)iter->g << "," << (unsigned int)iter->b << ")\" />" << endl;
 	}
 	outputStream << "</svg>" << endl;
+
+	outputStream.close();
+}
+
+void render_tsp( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &parameters ) {
+	using std::vector;
+	using std::ofstream;
+	using std::stringstream;
+	using std::endl;
+	using std::runtime_error;
+
+	vector<StipplePoint> points(parameters.points);
+	stippler_getStipples(stippler, &points[0]);
+
+	ofstream outputStream( parameters.outputFile.c_str() );
+
+	if ( !outputStream.is_open() ) {
+		stringstream s;
+		s << "Unable to open output file " << parameters.outputFile;
+		throw runtime_error(s.str());
+	}
+
+    outputStream << "NAME : " << parameters.outputFile << endl;
+    outputStream << "TYPE : TSP" << endl;
+    outputStream << "DIMENSION: " << parameters.points << endl;
+    outputStream << "EDGE_WEIGHT_TYPE : EUC_2D" << endl;
+    outputStream << "NODE_COORD_SECTION" << endl;
+    
+    int pointNumber = 1;
+	for ( vector<StipplePoint>::iterator iter = points.begin(); iter != points.end(); ++iter, ++pointNumber) {
+        outputStream << pointNumber << " " << iter->x << " " << iter->y << endl;
+	}
+    
+    outputStream << "EOF" << endl;
+
+	outputStream.close();
+}
+
+void render_raw( STIPPLER_HANDLE stippler, const Voronoi::StipplingParameters &parameters ) {
+	using std::vector;
+	using std::ofstream;
+	using std::stringstream;
+	using std::endl;
+	using std::runtime_error;
+    using std::string;
+
+	vector<StipplePoint> points(parameters.points);
+	stippler_getStipples(stippler, &points[0]);
+
+    string outFilename = parameters.outputFile + ".raw";
+	ofstream outputStream( outFilename.c_str() );
+
+	if ( !outputStream.is_open() ) {
+		stringstream s;
+		s << "Unable to open output file " << outFilename;
+		throw runtime_error(s.str());
+	}
+    
+	if ( !outputStream.is_open() ) {
+		stringstream s;
+		s << "Unable to open output file " << outFilename;
+		throw runtime_error(s.str());
+	}
+
+    outputStream << parameters.points << endl;
+    for ( vector<StipplePoint>::iterator iter = points.begin(); iter != points.end(); ++iter) {
+        outputStream << iter->x << " " << iter->y << " " << iter->radius << " " << (int)iter->r << " " << (int)iter->g << " " << (int)iter->b << endl;
+	}
 
 	outputStream.close();
 }
@@ -178,6 +273,11 @@ int main( int argc, char *argv[] ) {
 		return -1;
 	}
 
+    cout << parameters.get()->stateFile << endl;
+    if (!parameters.get()->stateFile.empty()) {
+        set_stippler_state( stippler, *(parameters.get()) );    
+    }
+    
 	write_configuration( cout, *(parameters.get()) );
 	if ( parameters->createLogs ) {
 		write_configuration( log, *(parameters.get()) );
@@ -207,9 +307,17 @@ int main( int argc, char *argv[] ) {
 		}
 	} while ( t > parameters->threshold );
 
-	// render final result to SVG
+	// render final results
 	try {
-		render( stippler, *(parameters.get()) );
+        if (parameters->outputFormat.compare("svg") == 0) {
+    		render_raw( stippler, *(parameters.get()) );
+        } else if (parameters->outputFormat.compare("tsp") == 0) {
+            render_tsp( stippler, *(parameters.get()) );
+        }
+        
+        if (parameters->generateRaw) {
+            render_raw( stippler, *(parameters.get()) );
+        }
 	} catch (exception const &e) {
 		cerr << e.what();
 	}
